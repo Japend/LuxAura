@@ -4,7 +4,7 @@ using UnityEngine;
 using Utilities;
 using System.Threading;
 
-public class TPlayer
+public class OLD_TPlayer
 {
 
     #region SNAPSHOT VARIABLES
@@ -13,12 +13,12 @@ public class TPlayer
     /// By doing that this way, we don't need to crerate new objects, thus speeding up the process
     /// ONLY THE VARIABLES THAT CAN CHANGE DURING A GAME ARE STORED
     /// </summary>
-    List<TEventEntity> s_planets;
+    List<OLD_TEventEntity> s_planets;
     #endregion
 
 
-    private List<TEventEntity> planets;
-    public List<TEventEntity> Planets
+    private List<OLD_TEventEntity> planets;
+    public List<OLD_TEventEntity> Planets
     {
         get { return planets; }
     }
@@ -27,35 +27,22 @@ public class TPlayer
     public int Id { get { return id; } }
 
     private AI AI;
-    private AIType typeAI;
     private bool PendingAICycle = false;
     private bool deactivated = false;
 
     private bool decisionTaken = false;
     public bool DecisionTaken { get { return decisionTaken; } }
     public Actions actionToBeDone;
-    private TEffector effector;
+    private OLD_TEffector effector;
 
-    public TPlayer(int id, List<TEventEntity> planets, AIType AI, TEventEntity[] level, bool takeSnapshot = false)
+    public OLD_TPlayer(int id, List<OLD_TEventEntity> planets, AIType AI, OLD_TEventEntity[] level, bool takeSnapshot = false)
     {
         this.id = id;
         this.planets = planets;
         if (takeSnapshot)
             TakeSnapshot();
-        typeAI = AI;
-        initializeAI(level);
-    }
 
-    public TPlayer(int id, AIType typeAI, TEventEntity[] level)
-    {
-        this.id = id;
-        this.typeAI = typeAI;
-        initializeAI(level);
-    }
-
-    private void initializeAI(TEventEntity[] level)
-    {
-        switch (typeAI)
+        switch (AI)
         {
             case AIType.Dumb:
                 this.AI = new DumbAI();
@@ -64,15 +51,10 @@ public class TPlayer
                 this.AI = new RandomAI();
                 break;
             case AIType.Classic:
-                this.AI = new TClasicAI(this, level);
+                this.AI = new OLD_TClasicAI(this, level);
                 break;
         }
-        effector = new TEffector(this, level);
-    }
-
-    public void SetPlanets(List<TEventEntity> planets, bool takeSnapshot = false)
-    {
-        this.planets = planets;
+        effector = new OLD_TEffector(this, level);
     }
 
     public bool HasLost()
@@ -83,7 +65,7 @@ public class TPlayer
     public int GetCurrentUnitsNumber()
     {
         int total = 0;
-        foreach (TEventEntity ent in planets)
+        foreach (OLD_TEventEntity ent in planets)
         {
             total += ent.CurrentUnits;
         }
@@ -93,12 +75,12 @@ public class TPlayer
 
     public void TakeSnapshot()
     {
-        s_planets = new List<TEventEntity>(planets);
+        s_planets = new List<OLD_TEventEntity>(planets);
     }
 
     public void RestoreSnapshot()
     {
-        planets = new List<TEventEntity>(s_planets);
+        planets = new List<OLD_TEventEntity>(s_planets);
     }
 
     public void Decide()

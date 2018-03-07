@@ -60,7 +60,6 @@ public class Clock : MonoBehaviour {
     private void OnAITick(object sender, ElapsedEventArgs e)
     {
         AITicks++;
-        //print("TICK at " + System.DateTime.Now);
         System.Threading.Thread thread = new System.Threading.Thread(() => TickBubble(Clock.EventType.IATick));
         thread.Start();
     }

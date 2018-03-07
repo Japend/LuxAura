@@ -20,7 +20,7 @@ public class LevelInfo : MonoBehaviour {
                 GameObject.Find("Planet").GetComponent<EventEntity>().SetParameters(GlobalData.AI_PLAYERS + 1,2);
                 GameObject.Find("Planet (1)").GetComponent<EventEntity>().SetParameters(GlobalData.NO_PLAYER,2);
                 GameObject.Find("Planet (2)").GetComponent<EventEntity>().SetParameters(GlobalData.NO_PLAYER,2);
-                GameObject.Find("Planet (3)").GetComponent<EventEntity>().SetParameters(GlobalData.AI_PLAYERS + 2, 2);
+                GameObject.Find("Planet (3)").GetComponent<EventEntity>().SetParameters(GlobalData.HUMAN_PLAYER, 2);
                 GameObject.Find("Planet (4)").GetComponent<EventEntity>().SetParameters(GlobalData.NO_PLAYER, 2);
                 GameObject.Find("Planet (5)").GetComponent<EventEntity>().SetParameters(GlobalData.NO_PLAYER, 2);
                 GameObject.Find("Planet (6)").GetComponent<EventEntity>().SetParameters(GlobalData.AI_PLAYERS, 2);
@@ -38,7 +38,7 @@ public class LevelInfo : MonoBehaviour {
 
                 list = new List<EventEntity>();
                 list.Add(GameObject.Find("Planet (3)").GetComponent<EventEntity>());
-                playerArr[GlobalData.AI_PLAYERS + 2].PreparaLista(list);// = new Player(GlobalData.HUMAN_PLAYER, list);
+                playerArr[GlobalData.HUMAN_PLAYER].PreparaLista(list);// = new Player(GlobalData.HUMAN_PLAYER, list);
 
                 Game.Instance.Set(playerArr);
                 break;
@@ -50,7 +50,7 @@ public class LevelInfo : MonoBehaviour {
         switch (Application.loadedLevelName)
         {
             case "Test":
-                return 2;
+                return 3;
             default:
                 Debug.LogError("SCNE NOT FOUND");
                 return 2;

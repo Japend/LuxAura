@@ -9,8 +9,7 @@ public class TAttackInfo
     private int player;
     public int Player { get { return player; } }
 
-    private int units;
-    public int Units { get { return units; } }
+    public int Units;
 
     private int destiny;
     public int Destiny{ get { return destiny; } }
@@ -19,7 +18,7 @@ public class TAttackInfo
     {
         remainingTurns = turns;
         player = playerId;
-        this.units = units;
+        this.Units = units;
         this.destiny = destiny;
     }
 

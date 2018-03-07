@@ -7,7 +7,7 @@ using Utilities;
 public class TrainigLevels : MonoBehaviour
 {
     public string levelToLoad;
-
+    OLD_M_FlowController flow;
     void Start()
     {
         GameObject level = GameObject.Find(levelToLoad);
@@ -25,6 +25,7 @@ public class TrainigLevels : MonoBehaviour
             planets[i] = level.transform.GetChild(i).GetComponent<TrainingPlanetInfo>();
         }
 
-        M_FlowController.Instance.StartTraining(planets);
+        flow = new OLD_M_FlowController();
+        flow.StartTraining(planets);
     }
 }

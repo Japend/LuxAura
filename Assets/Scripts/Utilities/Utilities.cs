@@ -4,6 +4,20 @@ using UnityEngine;
 
 namespace Utilities
 {
+    public enum AIType
+    {
+        Dumb, Random, Classic, Montecarlo, NeuralNetwork
+    }
+
+    public enum Actions
+    {
+        Wait = 0,
+        AttackEnemy = 1,
+        AttackNeutral = 2,
+        Upgrade = 3,
+        Heal = 4
+    }
+
     public struct Pair<T, U>
     {
         public T first;

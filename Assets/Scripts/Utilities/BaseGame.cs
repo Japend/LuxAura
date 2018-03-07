@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Threading;
 
-public abstract class BaseGame : MonoBehaviour{
+public abstract class BaseGame/* : MonoBehaviour*/{
 
     public Mutex GameMutex;
     protected List<TAttackInfo> pendingAttacks;

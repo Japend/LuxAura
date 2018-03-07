@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Threading;
 
-public class TGame : BaseGame{
+public class OLD_TGame : BaseGame
+{
 
     #region SNAPSHOT VARIABLES
     /// <summary>
@@ -14,27 +15,27 @@ public class TGame : BaseGame{
     List<TAttackInfo> s_pendingAttacks;
     #endregion
 
-    TPlayer[] players;
-    public TPlayer[] Players {  get { return players; } }
+    OLD_TPlayer[] players;
+    public OLD_TPlayer[] Players { get { return players; } }
 
-    TEventEntity[] planets; 
-    public TEventEntity[] Planets {  get { return planets; } }
+    OLD_TEventEntity[] planets;
+    public OLD_TEventEntity[] Planets { get { return planets; } }
 
     //public List<TAttackInfo> PendingAttacks { get { return pendingAttacks; } }
 
 
 
-    public TGame(PlayerSettings[] players, TrainingPlanetInfo[] planetsInfo)
+    public OLD_TGame(PlayerSettings[] players, TrainingPlanetInfo[] planetsInfo)
     {
         GameMutex = new Mutex();
         Debug.Log("EMPEZANDO PARTIDA - CREANDO PLANETAS");
         #region PREPARING PLANETS
-        planets = new TPlanet[planetsInfo.Length];
+        planets = new OLD_TPlanet[planetsInfo.Length];
 
         //instantiate planets
         for (int i = 0; i < planetsInfo.Length; i++)
         {
-            planets[i] = new TPlanet(planetsInfo[i].Owner, planetsInfo[i].position, planetsInfo[i].MaxLevel, i, this);
+            planets[i] = new OLD_TPlanet(planetsInfo[i].Owner, planetsInfo[i].position, planetsInfo[i].MaxLevel, i);
             Debug.Log("Creando planeta " + i + " que pertenece al jugador " + planetsInfo[i].Owner + " situado en " + planetsInfo[i].position);
         }
 
@@ -48,12 +49,12 @@ public class TGame : BaseGame{
                 if (i == j)
                 {
                     aux[i] = -1;
-                    Debug.Log("El planeta " + i + " esta a una distancia de " + Vector3.Distance(planets[i].Position, planets[j].Position) + " al planeta " + j + " o, en turnos: " + aux[i]); 
+                    Debug.Log("El planeta " + i + " esta a una distancia de " + Vector3.Distance(planets[i].Position, planets[j].Position) + " al planeta " + j + " o, en turnos: " + aux[i]);
                     continue;
                 }
 
                 aux[i] = Utilities.Utilities.GetDistanceInTurns(planets[i].Position, planets[j].Position);
-                Debug.Log("El planeta " + i + " esta a una distancia de " + Vector3.Distance(planets[i].Position, planets[j].Position) + " al planeta " + j + " o, en turnos: " + aux[i]); 
+                Debug.Log("El planeta " + i + " esta a una distancia de " + Vector3.Distance(planets[i].Position, planets[j].Position) + " al planeta " + j + " o, en turnos: " + aux[i]);
             }
             planets[i].UpdateDistances(aux);
         }
@@ -61,18 +62,18 @@ public class TGame : BaseGame{
 
         Debug.Log("EMPEZANDO PARTIDA - CREANDO JUGADORES");
         #region PREPARING_PLAYERS
-        TPlayer[] mplayers = new TPlayer[players.Length];
-        List<TEventEntity> aux2;
+        OLD_TPlayer[] mplayers = new OLD_TPlayer[players.Length];
+        List<OLD_TEventEntity> aux2;
         for (int i = 0; i < players.Length; i++)
         {
-            aux2 = new List<TEventEntity>();
-            foreach (TEventEntity planet in planets)
+            aux2 = new List<OLD_TEventEntity>();
+            foreach (OLD_TEventEntity planet in planets)
             {
                 if (planet.CurrentPlayerOwner == i)
                     aux2.Add(planet);
             }
 
-            mplayers[i] = new TPlayer(i, aux2, players[i].TypeAI, planets, true);
+            mplayers[i] = new OLD_TPlayer(i, aux2, players[i].TypeAI, planets, true);
             Debug.Log("Jugador " + i + " creado con " + aux2.Count + " planetas e IA " + players[i].TypeAI);
         }
         this.players = mplayers;
@@ -81,7 +82,7 @@ public class TGame : BaseGame{
         TakeSnapshot();
     }
 
-    public TGame(TPlayer[] pl, TEventEntity[] planets, List<TAttackInfo> attacks)
+    public OLD_TGame(OLD_TPlayer[] pl, OLD_TEventEntity[] planets, List<TAttackInfo> attacks)
     {
         GameMutex = new Mutex();
         players = pl;
@@ -90,19 +91,6 @@ public class TGame : BaseGame{
         TakeSnapshot();
     }
 
-    public TGame()
-    {
-        GameMutex = new Mutex();
-    }
-
-
-    public void Initialize(TPlayer[] pl, TEventEntity[] planets, List<TAttackInfo> attacks)
-    {
-        players = pl;
-        this.planets = planets;
-        pendingAttacks = attacks;
-        TakeSnapshot();
-    }
     /// <summary>
     /// Checks if there is a winner and deactivates the players that have lost
     /// </summary>
@@ -110,7 +98,7 @@ public class TGame : BaseGame{
     public int SomeoneWon()
     {
         //first, we check each player to deactivate it if has lost already
-        foreach (TPlayer play in players)
+        foreach (OLD_TPlayer play in players)
         {
             if (play.HasLost())
             {
@@ -141,7 +129,7 @@ public class TGame : BaseGame{
     public int CheckPendingAttacks(int turns)
     {
         int result = int.MaxValue;
-        for(int i = pendingAttacks.Count - 1; i >= 0; i--)
+        for (int i = pendingAttacks.Count - 1; i >= 0; i--)
         {
             pendingAttacks[i].remainingTurns -= turns;
             Debug.Log("Al ataque de " + pendingAttacks[i].Player + " hacia " + pendingAttacks[i].Destiny + " con " + pendingAttacks[i].Units + " le faltan " + pendingAttacks[i].remainingTurns);
@@ -168,7 +156,7 @@ public class TGame : BaseGame{
     /// <param name="turns">The turns that will be played</param>
     public void CreateUnits(int turns)
     {
-        foreach(TEventEntity pl in planets)
+        foreach (OLD_TEventEntity pl in planets)
         {
             pl.Tick(turns);
         }
@@ -180,7 +168,7 @@ public class TGame : BaseGame{
     /// </summary>
     public void AITick()
     {
-        foreach (TPlayer play in players)
+        foreach (OLD_TPlayer play in players)
         {
             if (!play.HasLost())
             {
@@ -207,7 +195,7 @@ public class TGame : BaseGame{
 
         s_pendingAttacks = new List<TAttackInfo>(pendingAttacks);
     }
-    
+
 
     /// <summary>
     /// Restores the saved state of the game
@@ -237,7 +225,7 @@ public class TGame : BaseGame{
 
     public bool EveryoneDecided()
     {
-        foreach (TPlayer play in players)
+        foreach (OLD_TPlayer play in players)
         {
             if (!play.DecisionTaken)
                 return false;

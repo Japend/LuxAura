@@ -78,7 +78,7 @@ public abstract class EventEntity : ClockEventReceiver {
         currentLevel = 0;
         currentUnits = 0;
         currentExp = 0;
-        print(gameObject.name + " " + currentPlayerOwner);
+        //print(gameObject.name + " " + currentPlayerOwner);
     }
 
     public virtual void Start()
@@ -185,8 +185,8 @@ public abstract class EventEntity : ClockEventReceiver {
     /// This state is also saved in the return class as an snapshot
     /// </summary>
     /// <returns></returns>
-    public TEventEntity TakeSnapshot()
+    public TEventEntity TakeSnapshot(TGame game)
     {
-        return new TPlanet(currentUnits, maxHealth, currentHealth, expForNextLevel, currentLevel, transform.position, currentPlayerOwner, maxLevel, currentExp, currentContestantId, id);
+        return new TPlanet(currentUnits, maxHealth, currentHealth, expForNextLevel, currentLevel, transform.position, currentPlayerOwner, maxLevel, currentExp, currentContestantId, id, game);
     }
 }

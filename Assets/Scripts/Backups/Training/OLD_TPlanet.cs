@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TPlanet : TEventEntity
+public class OLD_TPlanet : OLD_TEventEntity
 {
     public const int MAX_PLANET_HEALTH = 100;
 
-    public TPlanet(int owner, Vector3 pos, int maxLevel, int id, TGame game)
+    public OLD_TPlanet(int owner, Vector3 pos, int maxLevel, int id)
     {
         currentUnits = 0;
         maxHealth = MAX_PLANET_HEALTH;
@@ -20,11 +20,10 @@ public class TPlanet : TEventEntity
         currentExp = 0;
         currentContestantId = GlobalData.NO_PLAYER;
         this.id = id;
-        currentGame = game;
     }
 
     //Use this constructor to instantiate in a certain state
-    public TPlanet(int currentUnits, int maxHealth, int currentHealth, int expForNextLevel, int currentLevel, Vector3 pos, int ownerId, int maxLevel, int currentExp, int currentContestsant, int id, TGame game)
+    public OLD_TPlanet(int currentUnits, int maxHealth, int currentHealth, int expForNextLevel, int currentLevel, Vector3 pos, int ownerId, int maxLevel, int currentExp, int currentContestsant, int id)
     {
         this.currentUnits = currentUnits;
         this.maxHealth = maxHealth;
@@ -38,7 +37,6 @@ public class TPlanet : TEventEntity
         this.currentContestantId = currentContestsant;
         this.id = id;
         TakeSnapshot();
-        currentGame = game;
     }
 
 
@@ -46,33 +44,33 @@ public class TPlanet : TEventEntity
     /// Checks if the player belongs to a player. If it does, makes sure everything is on order. If not,
     /// doesn't do anything. If it belongs to two, resets it
     /// </summary>
-  /* private void checkOwner()
-    {
+    /* private void checkOwner()
+      {
 
-        for (int j = 0; j < Game.Instance.Players.Length; j++)
-        {
-            if (Game.Instance.Players[j] == this || Game.Instance.Players[j].Planets == null)
-                continue;
-            //if two players own it, we reset the player
-            if (Game.Instance.Players[j].Planets.Contains(this) && j != currentPlayerOwner)
-            {
-                Game.Instance.Players[j].Planets.Remove(this);
-                Game.Instance.Players[j].Planets.Remove(this);
-                this.currentPlayerOwner = GlobalData.NO_PLAYER;
-                this.currentUnits = 0;
-                StopCoroutine("FadeColor");
-                StartCoroutine(FadeColor(currentPlayerOwner));
-                levelDown();
-                currentHealth = maxHealth;
-                expSlider.value = 0;
-                expSlider.enabled = false;
-                healthSlider.value = 100;
-                healthSlider.enabled = false;
-                Debug.LogError("Planet pertained to two different players");
-                return;
-            }
-        }
-    }*/
+          for (int j = 0; j < Game.Instance.Players.Length; j++)
+          {
+              if (Game.Instance.Players[j] == this || Game.Instance.Players[j].Planets == null)
+                  continue;
+              //if two players own it, we reset the player
+              if (Game.Instance.Players[j].Planets.Contains(this) && j != currentPlayerOwner)
+              {
+                  Game.Instance.Players[j].Planets.Remove(this);
+                  Game.Instance.Players[j].Planets.Remove(this);
+                  this.currentPlayerOwner = GlobalData.NO_PLAYER;
+                  this.currentUnits = 0;
+                  StopCoroutine("FadeColor");
+                  StartCoroutine(FadeColor(currentPlayerOwner));
+                  levelDown();
+                  currentHealth = maxHealth;
+                  expSlider.value = 0;
+                  expSlider.enabled = false;
+                  healthSlider.value = 100;
+                  healthSlider.enabled = false;
+                  Debug.LogError("Planet pertained to two different players");
+                  return;
+              }
+          }
+      }*/
 
     public override void Tick(int turns = 1)
     {
@@ -91,7 +89,7 @@ public class TPlanet : TEventEntity
             {
                 //if the planet is conquered
                 if (info.Units >= currentHealth)
-                { 
+                {
                     /*if (currentPlayerOwner != GlobalData.NO_PLAYER)
                         M_FlowController.Instance.Players[currentPlayerOwner].Planets.Remove(this);*/
 
@@ -99,7 +97,7 @@ public class TPlanet : TEventEntity
                     currentPlayerOwner = info.Player;
                     currentHealth = maxHealth;
                     currentContestantId = -1;
-                    currentGame.Players[currentPlayerOwner].Planets.Add(this);
+                    OLD_M_FlowController.Instance.CurrentGame.Players[currentPlayerOwner].Planets.Add(this);
 
                 }
                 else
@@ -184,9 +182,9 @@ public class TPlanet : TEventEntity
             info.Units -= CurrentUnits + currentHealth + CurrentExp;
             currentUnits = 0;
             currentUnits += info.Units;
-            currentGame.Players[currentPlayerOwner].Planets.Remove(this);
+            OLD_M_FlowController.Instance.CurrentGame.Players[currentPlayerOwner].Planets.Remove(this);
             currentPlayerOwner = info.Player;
-            currentGame.Players[currentPlayerOwner].Planets.Add(this);
+            OLD_M_FlowController.Instance.CurrentGame.Players[currentPlayerOwner].Planets.Add(this);
             currentHealth = maxHealth;
             currentExp = 0;
             levelDown();

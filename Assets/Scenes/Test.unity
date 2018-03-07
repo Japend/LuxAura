@@ -381,19 +381,20 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &453264578
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 453264577}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 78b8a0fe0af123648b7fb31e82c29707, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Id: 1
+  typeAI: 0
 --- !u!4 &453264579
 Transform:
   m_ObjectHideFlags: 0
@@ -925,7 +926,6 @@ MonoBehaviour:
   - {fileID: 1457703610}
   - {fileID: 1179921135}
   - {fileID: 978373254}
-  - {fileID: 453264578}
 --- !u!114 &935635617
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -965,7 +965,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78b8a0fe0af123648b7fb31e82c29707, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Id: 1
+  Id: 2
+  typeAI: 2
 --- !u!4 &978373255
 Transform:
   m_ObjectHideFlags: 0
@@ -1057,6 +1058,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Id: 1
+  typeAI: 2
 --- !u!4 &1179921136
 Transform:
   m_ObjectHideFlags: 0
@@ -1099,7 +1101,7 @@ RectTransform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1204504168}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -474, y: -286.5, z: 0}
+  m_LocalPosition: {x: -306.66666, y: -232.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 2013156444}
@@ -1218,7 +1220,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78b8a0fe0af123648b7fb31e82c29707, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Id: 2
+  Id: 0
+  typeAI: 0
 --- !u!4 &1457703611
 Transform:
   m_ObjectHideFlags: 0
@@ -1421,7 +1424,7 @@ RectTransform:
   m_GameObject: {fileID: 2013156440}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -331, y: -461, z: -879}
-  m_LocalScale: {x: 1.5797788, y: 1.5797788, z: 1.5797788}
+  m_LocalScale: {x: 1.9047619, y: 1.9047619, z: 1.9047619}
   m_Children:
   - {fileID: 1204504169}
   - {fileID: 113393149}

@@ -78,23 +78,34 @@ public class Game {
     public TGame GetSnapshot()
     {
         TEventEntity[] s_planets = new TEventEntity[planets.Length];
+        TGame game = new TGame();
 
         for (int i = 0; i < planets.Length; i++)
         {
-            s_planets[i] = planets[i].TakeSnapshot();
+            s_planets[i] = planets[i].TakeSnapshot(game);
         }
 
         TPlayer[] s_players = new TPlayer[players.Length];
+        List<TEventEntity> aux;
         for (int i = 0; i < players.Length; i++)
         {
-            s_players[i] = players[i].GetSnapshotInstance();
+            aux = new List<TEventEntity>();
+            s_players[i] = players[i].GetSnapshotInstance(s_planets);
+            foreach (TEventEntity ent in s_planets)
+            {
+                if (ent.CurrentPlayerOwner == s_players[i].Id)
+                    aux.Add(ent);
+            }
+            s_players[i].SetPlanets(aux);
         }
 
         List<TAttackInfo> s_attacks = new List<TAttackInfo>();
         foreach (Transform att in attackPool.transform)
         {
-            s_attacks.Add(att.GetComponent<Attack>().GetTrainingSnapshot());
+            if(att.gameObject.activeSelf)
+                s_attacks.Add(att.GetComponent<Attack>().GetTrainingSnapshot());
         }
-        return new TGame(s_players, s_planets, s_attacks);
+        game.Initialize (s_players, s_planets, s_attacks);
+        return game;
     }
 }

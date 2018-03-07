@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class TEventEntity
+public abstract class OLD_TEventEntity
 {
 
     protected const int EXP_FOR_LEVEL_1 = 100;
@@ -106,7 +106,7 @@ public abstract class TEventEntity
         if (info.Units > currentUnits)
             info.Units = currentUnits;
         currentUnits -= info.Units;
-        currentGame.AddAttack(info);
+        OLD_M_FlowController.Instance.CurrentGame.AddAttack(info);
     }
 
     public int GetExpForLEvel(int lvl)

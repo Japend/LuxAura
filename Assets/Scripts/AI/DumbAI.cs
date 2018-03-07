@@ -3,7 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using Utilities;
 
-public interface AI {
+public class DumbAI : AI {
 
-    Actions Decide();
+    public Actions Decide()
+    {
+        return Actions.Wait;
+    }
+
 }

@@ -13,6 +13,9 @@ public class FlowController : MonoBehaviour {
     public GameObject VictoryText;
     private Game currentGame;
 
+    private float remainingTime;
+    private M_FlowController test;
+
     void Awake()
     {
         instance = this;
@@ -25,6 +28,9 @@ public class FlowController : MonoBehaviour {
         }
 
         currentGame = new Game(planets);
+
+        remainingTime = 5f;
+        test = new M_FlowController();
     }
 	
 	// Update is called once per frame
@@ -33,6 +39,13 @@ public class FlowController : MonoBehaviour {
         {
             Clock.Instance.OnApplicationQuit();
             VictoryText.SetActive(true);
+        }
+
+        remainingTime -= Time.deltaTime;
+        if (remainingTime <= 0)
+        {
+            remainingTime = 5;
+            test.StartTraining(currentGame.GetSnapshot());
         }
 	}
 

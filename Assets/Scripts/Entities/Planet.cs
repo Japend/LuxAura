@@ -42,7 +42,7 @@ public class Planet : EventEntity
         UnitsNumberText.text = System.Convert.ToString(CurrentUnits);
 
         frameCount++;
-        if (frameCount >= 10)
+        if (frameCount >= 100)
         {
             checkOwner();
             frameCount = 0;
@@ -75,7 +75,7 @@ public class Planet : EventEntity
             if(Game.Instance.Players[j].Planets.Contains(this) && j != currentPlayerOwner)
             {
                 Game.Instance.Players[j].Planets.Remove(this);
-                Game.Instance.Players[j].Planets.Remove(this);
+                Game.Instance.Players[currentPlayerOwner].Planets.Remove(this);
                 this.currentPlayerOwner = GlobalData.NO_PLAYER;
                 this.currentUnits = 0;
                 StopCoroutine("FadeColor");
@@ -100,7 +100,7 @@ public class Planet : EventEntity
         {
             case Clock.EventType.MainTick:
             default:
-                if(CurrentPlayerOwner > GlobalData.NO_PLAYER && currentPlayerOwner != GlobalData.HUMAN_PLAYER)
+                if(CurrentPlayerOwner > GlobalData.NO_PLAYER)
                     currentUnits += 1 + currentLevel;
                 break;
 
@@ -121,6 +121,8 @@ public class Planet : EventEntity
     {
         if (setHealthToMaxPending)
         {
+            StopCoroutine("UpdateHealthSliderUp");
+            StopCoroutine("UpdateHealthSliderDown");
             currentHealth = maxHealth;
             healthSlider.value = healthSlider.maxValue;
             healthSlider.enabled = false;
@@ -247,6 +249,7 @@ public class Planet : EventEntity
             Game.Instance.Players[currentPlayerOwner].Planets.Add(this);
             currentHealth = 0;
             currentExp = 0;
+            setHealthToMaxPending = true;
             StopCoroutine("FadeColor");
             StartCoroutine(FadeColor(currentPlayerOwner));
             levelDown();
@@ -361,7 +364,6 @@ public class Planet : EventEntity
             healthSlider.enabled = false;
             currentHealth = MaxHealth;
             setHealthToMaxPending = false;
-            print("CONQUISTADO");
         }
     }
 

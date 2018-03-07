@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Utilities;
 
 public class Player :ClockEventReceiver{
 
@@ -11,9 +12,13 @@ public class Player :ClockEventReceiver{
     }
 
     public int Id;
+    public AIType typeAI;
+    public bool Deactivated { get { return deactivated; } }
 
-    private ClasicAI AI;
+    private AI AI;
     private bool PendingAICycle = false;
+    private Effector myEffector;
+    private bool deactivated;
 
     /*public Player(int id, List<EventEntity> list)
     {
@@ -30,8 +35,21 @@ public class Player :ClockEventReceiver{
     {
         if (Id > GlobalData.HUMAN_PLAYER)
         {
-            AI = new ClasicAI(this);
+            switch (typeAI)
+            {
+                case AIType.Dumb:
+                    AI = new DumbAI();
+                    break;
+                case AIType.Random:
+                    AI = new RandomAI();
+                    break;
+                case AIType.Classic:
+                    AI = new ClasicAI(this);
+                    break;
+            }
             Clock.Instance.AddListener(this);
+            myEffector = new Effector(this);
+            deactivated = false;
         }
     }
 
@@ -42,10 +60,14 @@ public class Player :ClockEventReceiver{
 
     void Update()
     {
-        if (PendingAICycle)
+        if (Id != GlobalData.HUMAN_PLAYER)
         {
-            PendingAICycle = false;
-            AI.Decide();
+            if (PendingAICycle)
+            {
+                PendingAICycle = false;
+                Actions act = AI.Decide();
+                myEffector.Execute(act);
+            }
         }
 
     }
@@ -78,20 +100,26 @@ public class Player :ClockEventReceiver{
 
     public override void Tick(Clock.EventType type)
     {
-        
-        if (type == Clock.EventType.IATick && AI != null)
+        if (planets.Count <= 0)
+            deactivated = true;
+        if (!deactivated)
         {
-            //print("tick ia");
-            PendingAICycle = true;
-           /* StopCoroutine("AICycle");
-            StartCoroutine("AICYcle");*/
+            if (type == Clock.EventType.IATick && AI != null)
+            {
+                //print("tick ia");
+                PendingAICycle = true;
+                /* StopCoroutine("AICycle");
+                 StartCoroutine("AICYcle");*/
+            }
         }
     }
 
     IEnumerator AICycle()
     {
         yield return null;
-        AI.Decide();
+        Actions act = AI.Decide();
+        yield return null;
+        myEffector.Execute(act);
     }
 
     /// <summary>
@@ -99,8 +127,8 @@ public class Player :ClockEventReceiver{
     /// It also stores this state as a snapshot in the return instance
     /// </summary>
     /// <returns>Instsance of the simplified class in the same state and with snapshot saved</returns>
-    public TPlayer GetSnapshotInstance()
+    public TPlayer GetSnapshotInstance(TEventEntity[] s_planets)
     {
-        return null;
+        return new TPlayer(Id, typeAI, s_planets);
     }
 }

@@ -1,25 +1,23 @@
-﻿using System.Collections;
+﻿/*using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TClasicAI : AI
+public class ClasicAI
 {
 
-    private TPlayer myPlayer;
-    private List<TEventEntity> map;
-    private List<TAttackInfo> attackList;
+    private Player myPlayer;
+    private GameObject map;
 
-    public TClasicAI(TPlayer play)
+    public ClasicAI(Player play)
     {
         myPlayer = play;
-        map = play.Planets;
+        map = GameObject.Find("Level");
     }
 
     public void Decide()
     {
         bool attack = false;
         bool attackNeutal = false;
-        attackList.Clear();
 
         if (PlanetsNeedHealing())
         {
@@ -41,7 +39,7 @@ public class TClasicAI : AI
                 attackNeutal = true;
         }
 
-        TEventEntity objective;
+        EventEntity objective;
         if (ThereAreNeutralPlanets() && !attack)
         {
             //print("Hay neutrales");
@@ -64,9 +62,9 @@ public class TClasicAI : AI
     private void LevelUpMyPlanets()
     {
         //will choose the planet closer to be leveled up or the first one it has in the list
-        TEventEntity objective = null;
+        EventEntity objective = null;
         int currentExpNeeded = int.MaxValue;
-        foreach (TEventEntity ent in myPlayer.Planets)
+        foreach (EventEntity ent in myPlayer.Planets)
         {
             if (ent.ExpForNextLevel - ent.CurrentExp < currentExpNeeded)
             {
@@ -81,11 +79,11 @@ public class TClasicAI : AI
     private void HealMyPlanets()
     {
 
-        foreach (TPlanet ent in myPlayer.Planets)
+        foreach (Planet ent in myPlayer.Planets)
         {
             if (ent.CurrentHealth < ent.MaxHealth)
             {
-                ent.UseUnits(new TAttackInfo(0, myPlayer.Id, ent.MaxHealth - ent.CurrentHealth, ent.Id));
+                ent.UseUnits(new AttackInfo(ent.gameObject, ent.gameObject, myPlayer.Id, ent.MaxHealth - ent.CurrentHealth), true);
             }
         }
     }
@@ -95,15 +93,15 @@ public class TClasicAI : AI
     /// The units will be sent from the nearest planets
     /// </summary>
     /// <param name="objective">Entity that will be attacked</param>
-    public void Attack(TEventEntity objective, bool randomNumber = false, bool turnNeutral = false)
+    public void Attack(EventEntity objective, bool randomNumber = false, bool turnNeutral = false)
     {
         int objectiveUnits = CountNecessaryUnitsToConquer(objective, randomNumber, turnNeutral);
-        List<TEventEntity> planets = getPlanetsSortedByDistance(objective);
+        List<EventEntity> planets = getPlanetsSortedByDistance(objective);
 
         for (int i = 0; i < planets.Count; i++)
         {
             objectiveUnits -= planets[i].CurrentUnits;
-            planets[i].UseUnits(new TAttackInfo(Utilities.Utilities.GetDistanceInTurns(planets[i].Position, objective.Position), myPlayer.Id, planets[i].CurrentUnits, objective.Id));
+            planets[i].UseUnits(new AttackInfo(planets[i].gameObject, objective.gameObject, myPlayer.Id, planets[i].CurrentUnits), true);
             if (objectiveUnits <= 0)
                 return;
         }
@@ -112,9 +110,9 @@ public class TClasicAI : AI
 
     private bool ThereAreNeutralPlanets()
     {
-        foreach (TEventEntity child in map)
+        foreach (Transform child in map.transform)
         {
-            if (child.CurrentPlayerOwner == GlobalData.NO_PLAYER)
+            if (child.GetComponent<EventEntity>().CurrentPlayerOwner == GlobalData.NO_PLAYER)
                 return true;
         }
 
@@ -126,30 +124,33 @@ public class TClasicAI : AI
     /// </summary>
     /// <param name="returnNeutral"></param>
     /// <returns></returns>
-    private TEventEntity GetNearestPlanet(bool returnNeutral = false)
+    private EventEntity GetNearestPlanet(bool returnNeutral = false)
     {
-        TEventEntity aux = null;
+        GameObject aux = null;
         float currentDistance = float.PositiveInfinity;
-        foreach (TEventEntity child in map)
+        foreach (Transform child in map.transform)
         {
-            for (int i = 0; i < myPlayer.Planets.Count; i++)
+            if (!myPlayer.Planets.Contains(child.gameObject.GetComponent<EventEntity>()))
             {
-                if (Vector3.Distance(child.Position, myPlayer.Planets[i].Position) < currentDistance)
+                for (int i = 0; i < myPlayer.Planets.Count; i++)
                 {
-                    if (returnNeutral)
+                    if (Vector3.Distance(child.position, myPlayer.Planets[i].transform.position) < currentDistance)
                     {
-                        if (child.CurrentPlayerOwner == GlobalData.NO_PLAYER)
+                        if (returnNeutral)
                         {
-                            aux = child;
-                            currentDistance = Vector3.Distance(child.Position, myPlayer.Planets[i].Position);
+                            if (child.GetComponent<EventEntity>().CurrentPlayerOwner == GlobalData.NO_PLAYER)
+                            {
+                                aux = child.gameObject;
+                                currentDistance = Vector3.Distance(child.position, myPlayer.Planets[i].transform.position);
+                            }
                         }
-                    }
-                    else
-                    {
-                        if (child.CurrentPlayerOwner != GlobalData.NO_PLAYER)
+                        else
                         {
-                            aux = child;
-                            currentDistance = Vector3.Distance(child.Position, myPlayer.Planets[i].Position);
+                            if (child.GetComponent<EventEntity>().CurrentPlayerOwner != GlobalData.NO_PLAYER)
+                            {
+                                aux = child.gameObject;
+                                currentDistance = Vector3.Distance(child.position, myPlayer.Planets[i].transform.position);
+                            }
                         }
                     }
                 }
@@ -162,7 +163,7 @@ public class TClasicAI : AI
             return myPlayer.Planets[0];
         }
         else
-            return aux;
+            return aux.GetComponent<EventEntity>();
     }
 
     /// <summary>
@@ -171,7 +172,7 @@ public class TClasicAI : AI
     /// <param name="ent">Entity we want to know abouta</param>
     /// <param name="turnNeutral">If true will return units to turn neutral</param>
     /// <returns></returns>
-    private int CountNecessaryUnitsToConquer(TEventEntity ent, bool randomNumber = false, bool turnNeutral = false)
+    private int CountNecessaryUnitsToConquer(EventEntity ent, bool randomNumber = false, bool turnNeutral = false)
     {
         int objective = 0;
 
@@ -206,10 +207,10 @@ public class TClasicAI : AI
             return objective;
     }
 
-    private List<TEventEntity> getPlanetsSortedByDistance(TEventEntity refernce)
+    private List<EventEntity> getPlanetsSortedByDistance(EventEntity refernce)
     {
-        List<TEventEntity> result = new List<TEventEntity>();
-        TEventEntity aux, aux2;
+        List<EventEntity> result = new List<EventEntity>();
+        EventEntity aux, aux2;
         float currentDistance = float.PositiveInfinity;
         result.Add(myPlayer.Planets[0]);
 
@@ -219,7 +220,7 @@ public class TClasicAI : AI
             aux2 = aux;
             for (int j = 0; i < result.Count; j++)
             {
-                if (Vector3.Distance(aux.Position, refernce.Position) < Vector3.Distance(result[j].Position, refernce.Position))
+                if (Vector3.Distance(aux.transform.position, refernce.transform.position) < Vector3.Distance(result[j].transform.position, refernce.transform.position))
                 {
                     aux2 = result[j];
                     result[j] = aux;
@@ -234,7 +235,7 @@ public class TClasicAI : AI
 
     private bool PlanetsNeedHealing()
     {
-        foreach (TEventEntity ent in myPlayer.Planets)
+        foreach (EventEntity ent in myPlayer.Planets)
         {
             if (ent.CurrentHealth < ent.MaxHealth)
                 return true;
@@ -244,11 +245,11 @@ public class TClasicAI : AI
 
     private bool PlanetsNotAtMaximmumLevel()
     {
-        foreach (TEventEntity ent in myPlayer.Planets)
+        foreach (EventEntity ent in myPlayer.Planets)
         {
             if (ent.CurrentLevel < ent.MaxLevel)
                 return true;
         }
         return false;
     }
-}
+}*/

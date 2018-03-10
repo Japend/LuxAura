@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Utilities;
-using Utilities;
 
 
 public class OLD_M_FlowController : MonoBehaviour
@@ -36,7 +35,6 @@ public class OLD_M_FlowController : MonoBehaviour
     IEnumerator Train()
     {
         bool someoneWon = false;
-        bool everyoneDecided = false;
         int currentWinner = GlobalData.NO_PLAYER;
         int turnsToAdvance = 1;
         int turnsBetweenAITicks = (int)(GlobalData.MILISECONDS_BETWEEN__AI_TICKS / GlobalData.MILISECONDS_BETWEEN_TICKS);
@@ -90,7 +88,6 @@ public class OLD_M_FlowController : MonoBehaviour
                  }*/
                 //yield return null;
             }
-            currentGame.Players[1].Planets.Remove(currentGame.Planets[1]);
             gamesPlayed++;
             yield return null;
         }

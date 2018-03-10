@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Timers;
 
 namespace Utilities
 {
@@ -11,6 +12,7 @@ namespace Utilities
 
     public enum Actions
     {
+        None = -1,
         Wait = 0,
         AttackEnemy = 1,
         AttackNeutral = 2,
@@ -35,6 +37,11 @@ namespace Utilities
         public static int GetDistanceInTurns(Vector3 ori, Vector3 dest)
         {
             return (int)(Vector3.Distance(ori, dest) / Attack.MOVEMENT_SPEED * (1000f / GlobalData.MILISECONDS_BETWEEN_TICKS));
+        }
+
+        public static void DebugSnapshot(TGame snapshot)
+        {
+
         }
     }
 }

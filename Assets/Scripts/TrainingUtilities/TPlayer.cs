@@ -61,6 +61,7 @@ public class TPlayer
                 this.AI = new DumbAI();
                 break;
             case AIType.Random:
+            case AIType.Montecarlo: //to avoid overloading the simulation
                 this.AI = new RandomAI();
                 break;
             case AIType.Classic:
@@ -101,13 +102,23 @@ public class TPlayer
         planets = new List<TEventEntity>(s_planets);
     }
 
-    public void Decide()
+    /// <summary>
+    /// Will decide unless a specific action provided (in which case, the
+    /// provided action will be executed)
+    /// </summary>
+    /// <param name="act">Optional. Action that will be taken by the player</param>
+    public void Decide(Actions act = Actions.None)
     {
         if (!deactivated)
         {
-            decisionTaken = false;
-            //Thread thread = new Thread(DecisionThread);
-            DecisionThread();
+            if (act != Actions.None)
+                effector.Execute(act);
+            else
+            {
+                decisionTaken = false;
+                //Thread thread = new Thread(DecisionThread);
+                DecisionThread();
+            }
         }
     }
 

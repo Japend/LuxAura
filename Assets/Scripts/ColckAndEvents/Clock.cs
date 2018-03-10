@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Timers;
-
-public class Clock : MonoBehaviour {
+using Utilities;
+public class Clock : MonoBehaviour
+{
 
     public enum EventType
     {
@@ -25,28 +26,43 @@ public class Clock : MonoBehaviour {
     int currentReceivers;
 
     // Use this for initialization
-	void Awake () {
+    void Awake()
+    {
 
         ticks = 0;
 
         mainClock = new Timer(GlobalData.MILISECONDS_BETWEEN_TICKS);
         mainClock.Elapsed += OnMainTick;
         mainClock.AutoReset = true;
-        mainClock.Enabled = true;
+        mainClock.Start();
 
         AIclock = new Timer(GlobalData.MILISECONDS_BETWEEN__AI_TICKS);
         AIclock.Elapsed += OnAITick;
         AIclock.AutoReset = true;
-        AIclock.Enabled = true;
+        AIclock.Start();
 
         if (instance == null)
             instance = this;
-	}
+    }
 
     public void OnApplicationQuit()
     {
         print("Stoping clock");
         mainClock.Stop();
+        mainClock.Dispose();
+        AIclock.Stop();
+        AIclock.Dispose();
+    }
+
+    public void Stop()
+    {
+        mainClock.Stop();
+        AIclock.Stop();
+    }
+    public void Continue()
+    {
+        mainClock.Start();
+        AIclock.Start();
     }
 
     private void OnMainTick(object sender, ElapsedEventArgs e)
@@ -93,7 +109,7 @@ public class Clock : MonoBehaviour {
     {
         for (int i = 0; i < ticksReceivers.Length; i++)
         {
-            ClockEventReceiver aux; 
+            ClockEventReceiver aux;
 
             if (ticksReceivers[i] == ear)
             {
@@ -102,7 +118,7 @@ public class Clock : MonoBehaviour {
                 {
                     aux = ticksReceivers[currentReceivers];
                     ticksReceivers[currentReceivers] = null;
-                    ticksReceivers[i] = null;
+                    ticksReceivers[i] = aux;
                 }
                 else
                     ticksReceivers[i] = null;
@@ -112,6 +128,15 @@ public class Clock : MonoBehaviour {
             }
         }
         return false;
+    }
+
+
+    public void AddTimerForMontecarlo(System.Timers.ElapsedEventHandler receiver)
+    {
+        Timer mTimer = new Timer(GlobalData.MILISECONDS_BETWEEN_TICKS);
+        mTimer.Elapsed += receiver;
+        mTimer.AutoReset = true;
+        mTimer.Enabled = true;
     }
 
     /// <summary>

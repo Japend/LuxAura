@@ -20,9 +20,13 @@ public class TGame : BaseGame{
     TEventEntity[] planets; 
     public TEventEntity[] Planets {  get { return planets; } }
 
+    private bool weHaveAWinner;
+    public bool WeHaveAWinner { get { return weHaveAWinner; } }
+    private int winner;
+    public int Winner { get { return winner; } }
+
+
     //public List<TAttackInfo> PendingAttacks { get { return pendingAttacks; } }
-
-
 
     public TGame(PlayerSettings[] players, TrainingPlanetInfo[] planetsInfo)
     {
@@ -79,6 +83,8 @@ public class TGame : BaseGame{
         #endregion
         pendingAttacks = new List<TAttackInfo>();
         TakeSnapshot();
+        winner = GlobalData.NO_PLAYER;
+        weHaveAWinner = false;
     }
 
     public TGame(TPlayer[] pl, TEventEntity[] planets, List<TAttackInfo> attacks)
@@ -88,6 +94,8 @@ public class TGame : BaseGame{
         this.planets = planets;
         pendingAttacks = attacks;
         TakeSnapshot();
+        winner = GlobalData.NO_PLAYER;
+        weHaveAWinner = false;
     }
 
     public TGame()
@@ -101,6 +109,8 @@ public class TGame : BaseGame{
         players = pl;
         this.planets = planets;
         pendingAttacks = attacks;
+        winner = GlobalData.NO_PLAYER;
+        weHaveAWinner = false;
         TakeSnapshot();
     }
     /// <summary>
@@ -128,6 +138,11 @@ public class TGame : BaseGame{
                 if (currentWinner != planets[i].CurrentPlayerOwner && planets[i].CurrentPlayerOwner != GlobalData.NO_PLAYER)
                     return GlobalData.NO_PLAYER;
             }
+        }
+        if (currentWinner != GlobalData.NO_PLAYER)
+        {
+            weHaveAWinner = true;
+            winner = currentWinner;
         }
         return currentWinner;
     }
@@ -186,6 +201,29 @@ public class TGame : BaseGame{
             {
                 play.Decide();
                 Debug.Log("Jugador " + play.Id + " decide " + play.actionToBeDone);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Simulates an AI tick but the provided player will take the given decision
+    /// </summary>
+    /// <param name="idPlayerFixedDecision">The player that will execute the given action</param>
+    /// <param name="act">The action to be executed by the provided player</param>
+    public void AITick(int idPlayerFixedDecision, Utilities.Actions act)
+    {
+
+        for (int i = 0; i < players.Length; i++)
+        {
+            if (!players[i].HasLost())
+            {
+                if (i == idPlayerFixedDecision)
+                {
+                    players[i].Decide(act);
+                }
+                else
+                    players[i].Decide();
+
             }
         }
     }

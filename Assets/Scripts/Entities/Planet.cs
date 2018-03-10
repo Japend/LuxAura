@@ -17,7 +17,8 @@ public class Planet : EventEntity
     public Slider healthSlider, expSlider;
     int frameCount = 0;
     bool setHealthToMaxPending = true;
-    MeshRenderer renderer;
+    bool expForNExtLevelUpdatePending = false;
+    MeshRenderer mRenderer;
 
     // Use this for initialization
     public override void Start()
@@ -33,7 +34,7 @@ public class Planet : EventEntity
         currentHealth = MaxHealth;
         expForNextLevel = EXP_FOR_LEVEL_1;
         currentLevel = 0;
-        renderer = this.gameObject.GetComponentInChildren<MeshRenderer>();
+        mRenderer = this.gameObject.GetComponentInChildren<MeshRenderer>();
     }
 
     // Update is called once per frame
@@ -52,7 +53,7 @@ public class Planet : EventEntity
     //Checks if the color is correct and if its not, updates it
     private void checkColor()
     {
-        if (renderer.material.color != (Color) GlobalData.GetColor(currentPlayerOwner))
+        if (mRenderer.material.color != (Color) GlobalData.GetColor(currentPlayerOwner))
         {
             StopCoroutine("FadeColor");
             StartCoroutine(FadeColor(currentPlayerOwner));
@@ -127,6 +128,16 @@ public class Planet : EventEntity
             healthSlider.value = healthSlider.maxValue;
             healthSlider.enabled = false;
             setHealthToMaxPending = false;
+        }
+
+        if (expForNExtLevelUpdatePending)
+        {
+            StopCoroutine("UpdateExpSliderUp");
+            StopCoroutine("UpdateExpSliderDown");
+            expSlider.value = 0;
+            expSlider.enabled = false;
+            expForNExtLevelUpdatePending= false;
+            expForNextLevel = GetExpForLEvel(currentLevel);
         }
         //if the planet is neutral
         if (CurrentPlayerOwner == GlobalData.NO_PLAYER)
@@ -302,6 +313,8 @@ public class Planet : EventEntity
     private void levelUp()
     {
         currentLevel++;
+        //expForNextLevel = GetExpForLEvel(currentLevel);
+        expForNExtLevelUpdatePending = true;
         StopCoroutine("ScaleLevel");
         StartCoroutine("ScaleLevel");
     }
@@ -309,6 +322,8 @@ public class Planet : EventEntity
     private void levelDown()
     {
         currentLevel = 0;
+        //expForNextLevel = GetExpForLEvel(currentLevel);
+        expForNExtLevelUpdatePending = true;
         StopCoroutine("ScaleLevel");
         StartCoroutine("ScaleLevel");
     }
@@ -412,6 +427,7 @@ public class Planet : EventEntity
             expSlider.value = 0;
             expSlider.enabled = false;
             expForNextLevel = GetExpForLEvel(currentLevel);
+            expForNExtLevelUpdatePending = false;
         }
     }
 
@@ -433,6 +449,7 @@ public class Planet : EventEntity
 
         if (expSlider.value == 0)
         {
+            expForNExtLevelUpdatePending = false;
             expSlider.enabled = false;
             expForNextLevel = GetExpForLEvel(currentLevel);
         }

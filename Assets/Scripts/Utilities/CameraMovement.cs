@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CameraMovement : MonoBehaviour {
+public class CameraMovement : MonoBehaviour
+{
 
     private int MARGIN = Screen.width / 100 * 10;
     private const float SPEED = 3f;
@@ -11,16 +12,18 @@ public class CameraMovement : MonoBehaviour {
     private const int MIN_FOV_DEGREES = 450;
 
     GameObject cameraObject;
-    Camera camera;
+    Camera mCamera;
 
-	// Use this for initialization
-	void Awake () {
+    // Use this for initialization
+    void Awake()
+    {
         cameraObject = this.gameObject;
-        camera = cameraObject.GetComponent<Camera>();
-	}
-	
-	// Update is called once per frame
-	void Update () {
+        mCamera = cameraObject.GetComponent<Camera>();
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
         if (Input.GetKey(KeyCode.LeftControl))
             return;
 
@@ -34,7 +37,7 @@ public class CameraMovement : MonoBehaviour {
             newPosition.y = previousPosition.y - (MARGIN - mousePos.y) * Time.deltaTime * SPEED;
         }
         //up
-        else if(mousePos.y > Screen.height - MARGIN)
+        else if (mousePos.y > Screen.height - MARGIN)
         {
             newPosition.y = previousPosition.y - (Screen.height - MARGIN - mousePos.y) * Time.deltaTime * SPEED;
         }
@@ -58,15 +61,15 @@ public class CameraMovement : MonoBehaviour {
         {
             if (Input.GetAxis("Mouse ScrollWheel") > 0 || Input.GetKey(KeyCode.W))
             {
-                camera.orthographicSize -= ZOOM_SPEED + Time.deltaTime;
+                mCamera.orthographicSize -= ZOOM_SPEED + Time.deltaTime;
             }
-            else if((Input.GetAxis("Mouse ScrollWheel") < 0 || Input.GetKey(KeyCode.S)))
-                camera.orthographicSize += ZOOM_SPEED + Time.deltaTime;
+            else if ((Input.GetAxis("Mouse ScrollWheel") < 0 || Input.GetKey(KeyCode.S)))
+                mCamera.orthographicSize += ZOOM_SPEED + Time.deltaTime;
 
-            if (camera.orthographicSize > MAX_FOV_DEGREES)
-                camera.orthographicSize = MAX_FOV_DEGREES;
-            else if (camera.orthographicSize < MIN_FOV_DEGREES)
-                camera.orthographicSize = MIN_FOV_DEGREES;
+            if (mCamera.orthographicSize > MAX_FOV_DEGREES)
+                mCamera.orthographicSize = MAX_FOV_DEGREES;
+            else if (mCamera.orthographicSize < MIN_FOV_DEGREES)
+                mCamera.orthographicSize = MIN_FOV_DEGREES;
         }
-	}
+    }
 }

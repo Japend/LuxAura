@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Utilities;
-using Utilities;
 using System.Threading;
 
 [System.Serializable]
@@ -11,7 +10,8 @@ public class PlayerSettings
     public AIType TypeAI;
 }
 
-public class M_FlowController {
+public class M_FlowController
+{
 
     public int TotalGamesToPlay = 1;
 
@@ -57,7 +57,7 @@ public class M_FlowController {
         bool someoneWon = false;
         int currentWinner = GlobalData.NO_PLAYER;
         int turnsToAdvance = 1;
-        int turnsBetweenAITicks = (int) (GlobalData.MILISECONDS_BETWEEN__AI_TICKS / GlobalData.MILISECONDS_BETWEEN_TICKS);
+        int turnsBetweenAITicks = (int)(GlobalData.MILISECONDS_BETWEEN__AI_TICKS / GlobalData.MILISECONDS_BETWEEN_TICKS);
         int remainingTurnsForNextAITick = turnsBetweenAITicks;
 
         while (gamesPlayed < TotalGamesToPlay)
@@ -67,7 +67,7 @@ public class M_FlowController {
             someoneWon = false;
             while (!someoneWon)
             {
-                
+
                 //check pending attacks and get turns for the arrival of the next attack
                 turnsToAdvance = currentGame.CheckPendingAttacks(turnsToAdvance);
 
@@ -101,15 +101,67 @@ public class M_FlowController {
                     remainingTurnsForNextAITick = turnsBetweenAITicks;
                 }
 
-               /* while (!currentGame.EveryoneDecided())
-                {
-                    print("Esperando decision");
-                    yield return null;
-                }*/
+                /* while (!currentGame.EveryoneDecided())
+                 {
+                     print("Esperando decision");
+                     yield return null;
+                 }*/
                 //yield return null;
             }
-            currentGame.Players[1].Planets.Remove(currentGame.Planets[1]);
             gamesPlayed++;
         }
     }
+
+    /// <summary>
+    /// This method will simulate a decision 
+    /// </summary>
+    /// <param name="idOfSimulatedPlayer">The player that will execute the provided action</param>
+    /// <param name="act">The action that the provided player will do</param>
+    /// /// <param name="game">Optional. THe state of the game from which the simulation will start</param>
+    /// <returns>New instance of TGame with the new state of the game</returns>
+    public TGame AdvanceTurnAndExecuteActions(int idOfSimulatedPlayer, Actions act, TGame game = null)
+    {
+        //if no game was provided, we use the one that belongs to the class
+        if (game == null)
+            game = currentGame;
+
+
+        ///////first we will siomulate one turn for the AIs to decide and for this AI to execute the provided action/////
+        int turnsToAdvance = 1;
+        //check pending attacks and get turns for the arrival of the next attack
+        turnsToAdvance = game.CheckPendingAttacks(turnsToAdvance);
+
+        //check for victory (IMPORTANT TO DO IT AFTER THE ATTACKS AND NOT BEFORE)
+        game.SomeoneWon();
+
+        if (game.WeHaveAWinner)
+            return game;
+        //advance the obtained amount of normal turns
+        game.CreateUnits(turnsToAdvance);
+
+        game.AITick(idOfSimulatedPlayer, act);
+
+
+        ///////after that, we will advance the game enough turns that the next one will trigger an AITick//////////
+        turnsToAdvance = (int) (GlobalData.MILISECONDS_BETWEEN__AI_TICKS / GlobalData.MILISECONDS_BETWEEN_TICKS) - 1;
+
+        turnsToAdvance = game.CheckPendingAttacks(turnsToAdvance);
+
+        //check for victory (IMPORTANT TO DO IT AFTER THE ATTACKS AND NOT BEFORE)
+        game.SomeoneWon();
+
+        if (game.WeHaveAWinner)
+            return game;
+        //advance the obtained amount of normal turns
+        game.CreateUnits(turnsToAdvance);
+        return game;
+    }
+
+    #region DEBUG
+    public void TESTAdvanceTurnAndExecuteActions(int id, Actions act, TGame game)
+    {
+        AdvanceTurnAndExecuteActions(id, act, game);
+    }
+
+    #endregion
 }

@@ -203,7 +203,6 @@ public class OLD_TEffector
     {
         List<OLD_TEventEntity> result = new List<OLD_TEventEntity>();
         OLD_TEventEntity aux, aux2;
-        float currentDistance = float.PositiveInfinity;
         result.Add(myPlayer.Planets[0]);
 
         for (int i = 1; i < myPlayer.Planets.Count; i++)

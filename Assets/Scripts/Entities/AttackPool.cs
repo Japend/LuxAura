@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AttackPool : MonoBehaviour {
+public class AttackPool : MonoBehaviour
+{
 
     private int totalAvailable;
 
@@ -16,8 +17,9 @@ public class AttackPool : MonoBehaviour {
     public List<Attack> availableAttacks;
     private List<AttackInfo> pendingAttacksInfo;
 
-	// Use this for initialization
-	void Awake () {
+    // Use this for initialization
+    void Awake()
+    {
         instance = this;
         totalAvailable = gameObject.transform.childCount;
         availableAttacks = new List<Attack>();
@@ -26,7 +28,7 @@ public class AttackPool : MonoBehaviour {
         {
             availableAttacks.Add(child.GetComponent<Attack>());
         }
-	}
+    }
 
 
 
@@ -35,11 +37,11 @@ public class AttackPool : MonoBehaviour {
     /// Creates an attack from within the pool. If there are not enough attacks, it instanciates one more
     /// </summary>
     /// <param name="attackInfo">The information of the attack</param>
-	public void Attack(AttackInfo attackInfo)
+    public void Attack(AttackInfo attackInfo)
     {
         foreach (Attack at in availableAttacks)
         {
-            if (!at.gameObject.active)
+            if (!at.gameObject.activeSelf)
             {
                 at.gameObject.SetActive(true);
                 at.Prepare(attackInfo);

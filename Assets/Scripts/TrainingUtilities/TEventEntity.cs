@@ -152,4 +152,15 @@ public abstract class TEventEntity
         maxHealth = s_maxHealth;
         currentUnits = s_currentUnits;
     }
+
+    /// <summary>
+    /// Stores the current state in a new TEventEntity and returns it
+    /// DOES NOT OVERWRITE CURRENT SNAPSHOT
+    /// </summary>
+    /// <param name="game">The game to which the planet will be linked. If not provided, the current game will b used</param>
+    /// <returns></returns>
+    public TEventEntity GetSnapshot(TGame gm)
+    {
+        return new TPlanet(currentUnits, maxHealth, currentHealth, expForNextLevel, currentLevel, position, currentPlayerOwner, maxLevel, currentExp, currentContestantId, id, gm);
+    }
 }

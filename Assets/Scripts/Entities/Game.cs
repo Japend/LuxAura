@@ -52,6 +52,7 @@ public class Game {
         for (int i = 0; i < players.Length; i++)
         {
             players[i].Id = i;
+            players[i].currentGame = this;
         }
     }
 

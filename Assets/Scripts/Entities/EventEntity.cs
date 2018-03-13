@@ -83,7 +83,7 @@ public abstract class EventEntity : ClockEventReceiver {
 
     public virtual void Start()
     {
-        print("BASE AWAKE EVENT ENTITY");
+        //print("BASE AWAKE EVENT ENTITY");
         Clock.Instance.AddListener(this);
     }
 

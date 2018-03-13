@@ -25,7 +25,7 @@ public class Planet : EventEntity
     {
         base.Start();
         currentUnits = 0;
-        print("PLANET AWAKE");
+        //print("PLANET AWAKE");
 
         healthSlider.value = healthSlider.maxValue;
         healthSlider.enabled = false;

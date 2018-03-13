@@ -20,6 +20,7 @@ public class TPlanet : TEventEntity
         currentExp = 0;
         currentContestantId = GlobalData.NO_PLAYER;
         this.id = id;
+        TakeSnapshot();
         currentGame = game;
     }
 

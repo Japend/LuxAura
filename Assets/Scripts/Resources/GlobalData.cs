@@ -46,5 +46,8 @@ public class GlobalData
     public const int AI_PLAYERS = 1;
     public const int NUMBER_OF_ACTIONS = 5;
     public const int MONTECARLO_TIMER_MILISECONDS = 1500;
+
+    public const int MONTECARLO_REWARD = 10;
+    public const int MONTECARLO_PENALIZATION = -10;
     #endregion
 }

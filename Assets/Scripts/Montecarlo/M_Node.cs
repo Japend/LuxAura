@@ -4,13 +4,18 @@
     public int Visits;
     public int Score;
     public TGame State;
-    public M_Node[] Children;
+    private int position;
+    public int Position { get { return position; } }
+    public int freeChildren;
+    public bool Available;
 
-    public M_Node(TGame state)
+    public M_Node(TGame state, int position)
     {
         State = state;
         Visits = Score = 0;
-        Children = new M_Node[GlobalData.NUMBER_OF_ACTIONS];
+        freeChildren = GlobalData.NUMBER_OF_ACTIONS;
+        this.position = position;
+        Available = true;
     }
 
 }

@@ -28,7 +28,6 @@ public class Clock : MonoBehaviour
     // Use this for initialization
     void Awake()
     {
-
         ticks = 0;
 
         mainClock = new Timer(GlobalData.MILISECONDS_BETWEEN_TICKS);
@@ -133,9 +132,9 @@ public class Clock : MonoBehaviour
 
     public void AddTimerForMontecarlo(System.Timers.ElapsedEventHandler receiver)
     {
-        Timer mTimer = new Timer(GlobalData.MILISECONDS_BETWEEN_TICKS);
+        Timer mTimer = new Timer(GlobalData.MONTECARLO_TIMER_MILISECONDS);
         mTimer.Elapsed += receiver;
-        mTimer.AutoReset = true;
+        mTimer.AutoReset = false;
         mTimer.Enabled = true;
     }
 
@@ -168,4 +167,5 @@ public class Clock : MonoBehaviour
             rec.Tick(eventType);
         }
     }
+
 }

@@ -66,11 +66,25 @@ public class FlowController : MonoBehaviour {
         }
         else
         {
-            //DebugSnapshot();
-            TestAdvanceTurnAndExecuteAction();
             paused = true;
             Clock.Instance.Stop();
             Time.timeScale = 0f;
+
+            //PRUEBAS ARBOL MONTECARLO
+            MontecarloTree tree = new MontecarloTree(currentGame.GetSnapshot(), 0);
+            M_Node aux;
+            for (int i = 0; i < 200; i++)
+            {
+                aux = tree.SearchForNextNode();
+                aux.Score += Random.Range(-10, 10);
+                Debug.Log("El nodo " + aux.Position + " tiene ahora " + aux.Score + " puntos");
+                tree.BackpropagateScore(aux);
+            }
+
+
+            //DebugSnapshot(currentGame.GetSnapshot());
+           // DebugSnapshot(currentGame.GetSnapshot().TakeAndGetSnapshot());
+            //TestAdvanceTurnAndExecuteAction();
         }
     }
 

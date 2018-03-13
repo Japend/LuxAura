@@ -10,6 +10,9 @@ public class PlayerSettings
     public AIType TypeAI;
 }
 
+/// <summary>
+/// This class controlls the simultaion flow.
+/// </summary>
 public class M_FlowController
 {
 
@@ -52,6 +55,18 @@ public class M_FlowController
         t.Start();
     }
 
+
+    /// <summary>
+    /// Trains without creating a new thread
+    /// </summary>
+    /// <param name="game"></param>
+    public void StartTrainingInThisThread(TGame game)
+    {
+        currentGame = game;
+        Train();
+    }
+
+
     private void Train()
     {
         bool someoneWon = false;
@@ -62,9 +77,9 @@ public class M_FlowController
 
         while (gamesPlayed < TotalGamesToPlay)
         {
-            Debug.Log("COMENZANDO PARTIDA " + gamesPlayed + " DE " + TotalGamesToPlay);
-            currentGame.RestoreSnapshot();
+            //Debug.Log("COMENZANDO PARTIDA " + gamesPlayed + " DE " + TotalGamesToPlay);
             someoneWon = false;
+            currentGame.RestoreSnapshot();
             while (!someoneWon)
             {
 
@@ -83,7 +98,7 @@ public class M_FlowController
                 if (currentWinner != GlobalData.NO_PLAYER)
                 {
                     someoneWon = true;
-                    Debug.Log("ALGUIEN HA GANADO: " + currentWinner);
+                    //Debug.Log("ALGUIEN HA GANADO: " + currentWinner);
                 }
 
                 //advance the obtained amount of normal turns
@@ -94,9 +109,9 @@ public class M_FlowController
                 remainingTurnsForNextAITick -= turnsToAdvance;
                 if (remainingTurnsForNextAITick <= 0)
                 {
-                    Debug.Log("\n---------------------------TURNO------------------------\n");
-                    Debug.Log(" Tick de IA");
-                    Debug.Log("Ha ganado alguien? " + someoneWon);
+                    //Debug.Log("\n---------------------------TURNO------------------------\n");
+                    //Debug.Log(" Tick de IA");
+                    //Debug.Log("Ha ganado alguien? " + someoneWon);
                     currentGame.AITick();
                     remainingTurnsForNextAITick = turnsBetweenAITicks;
                 }
@@ -113,7 +128,7 @@ public class M_FlowController
     }
 
     /// <summary>
-    /// This method will simulate a decision 
+    /// This method will simulate a decision and advance as many turns as it needs for that the next turn after those triggers an AI tick.
     /// </summary>
     /// <param name="idOfSimulatedPlayer">The player that will execute the provided action</param>
     /// <param name="act">The action that the provided player will do</param>

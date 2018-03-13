@@ -14,6 +14,7 @@ public class Player :ClockEventReceiver{
     public int Id;
     public AIType typeAI;
     public bool Deactivated { get { return deactivated; } }
+    public Game currentGame;
 
     private AI AI;
     private bool PendingAICycle = false;
@@ -116,10 +117,26 @@ public class Player :ClockEventReceiver{
 
     IEnumerator AICycle()
     {
-        yield return null;
-        Actions act = AI.Decide();
-        yield return null;
-        myEffector.Execute(act);
+        if (typeAI != AIType.Montecarlo)
+        {
+            yield return null;
+            Actions act = AI.Decide();
+            yield return null;
+            myEffector.Execute(act);
+        }
+        else
+        {
+            MontecarloAI aux = (MontecarloAI)AI;
+            aux.MontecarloDecide(currentGame.GetSnapshot());
+            while (!aux.Ready)
+                yield return null;
+
+#if UNITY_EDITOR
+            if (aux.ActionToExecute == Actions.None)
+                Debug.LogError("ERROR EN MONTECARLO: NO SE HA OBTENIDO ACCION");
+#endif
+            myEffector.Execute(aux.ActionToExecute);
+        }
     }
 
     /// <summary>

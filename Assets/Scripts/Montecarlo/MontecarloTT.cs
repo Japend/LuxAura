@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Utilities;
+using System.Threading;
 
 public class MontecarloTT
 {
-
-    private M_Node root;
-    public M_Node Root { get { return root; } }
 
     /// <summary>
     /// When this variable is set to true, Montecarlo will stop expanding and will return the best action
@@ -16,24 +14,74 @@ public class MontecarloTT
     private bool stop;
 
     /// <summary>
-    /// Initializes the tree with the provided state at the root
+    /// For how long the algorithm will search for the best posible action
     /// </summary>
-    /// <param name="currentState">The state of the game from wich the simulation will start</param>
-    public MontecarloTT(TGame currentState, float executionTime = GlobalData.MONTECARLO_TIMER_MILISECONDS)
+    private float timeToPlay;
+
+    /// <summary>
+    /// The tree used by the algorithm
+    /// </summary>
+    private MontecarloTree tree;
+
+    /// <summary>
+    /// The id of the player that will execute this method
+    /// </summary>
+    private int id;
+
+    /// <summary>
+    /// Maximum number of concurrnt simulations
+    /// </summary>
+    private int maxSimulations;
+
+    /// <summary>
+    /// Simulations that are running in the background
+    /// </summary>
+    private int currentActiveSimulations;
+
+    /// <summary>
+    /// Will be used to secure the currentActiveSimulations atribute
+    /// </summary>
+    Mutex mMutex;
+
+    /// <summary>
+    /// The best action found by montecarlo
+    /// Will remian null unil the simulation stops
+    /// </summary>
+    public Actions bestAction;
+
+    /// <summary>
+    /// Class where the simulation results will be deployed
+    /// </summary>
+    MontecarloAI support;
+
+    /// <summary>
+    /// Initilices the class creating a tree but does NOT start the simulation
+    /// </summary>
+    /// <param name="playerId">Id of the player that will execute the tree</param>
+    /// <param name="support">Montecarlo AI instance that will receive the results</param>
+    /// <param name="executionTime">Miliseconds the simulation will take. Default = 1500</param>
+    public MontecarloTT(int playerId, MontecarloAI support, float executionTime = GlobalData.MONTECARLO_TIMER_MILISECONDS)
     {
-        root = new M_Node(currentState);
-        Clock.Instance.AddTimerForMontecarlo(new System.Timers.ElapsedEventHandler(TimesUp));
-        stop = false;
+        timeToPlay = executionTime;
+        id = playerId;
+        int dummy;
+        ThreadPool.GetMaxThreads(out maxSimulations, out dummy);
+        mMutex = new Mutex();
+        this.support = support;
     }
 
     /// <summary>
     /// Empties the tree and makes a new one with the provided state
     /// </summary>
     /// <param name="currentState">The new state of the game from wich the simulation will start</param>
-    public void ResetTree(TGame currentState)
+    public void StartTreeSearch(TGame currentState)
     {
-        root = new M_Node(currentState);
-        stop = false; 
+        stop = false;
+        Clock.Instance.AddTimerForMontecarlo(new System.Timers.ElapsedEventHandler(TimesUp));
+        //We substract one because the mother thread will always be there
+        maxSimulations--;
+        currentActiveSimulations = 0;
+        ThreadPool.QueueUserWorkItem(MotherThread, currentState);
     }
 
     /// <summary>
@@ -45,5 +93,56 @@ public class MontecarloTT
     public void TimesUp(object sender, System.Timers.ElapsedEventArgs e)
     {
         stop = true;
+        support.ActionToExecute = tree.GetBestAction();
+        support.Ready = true;
+    }
+
+
+    /// <summary>
+    /// The thread that will control the montecarlo execution
+    /// </summary>s
+    /// <param name="info">TGame with the current state of the game (the simullation will continue from there)</param>
+    private void MotherThread(System.Object info)
+    {
+        tree = new MontecarloTree((TGame)info, id);
+        M_Node aux;
+        while (!stop)
+        {
+            if (currentActiveSimulations <= maxSimulations)
+            {
+                aux = tree.SearchForNextNode();
+                mMutex.WaitOne();
+                currentActiveSimulations++;
+                mMutex.ReleaseMutex();
+                ThreadPool.QueueUserWorkItem(Simulate, aux);
+            }
+            else
+                Thread.Sleep(40);
+        }
+    }
+
+
+    private void Simulate(System.Object info)
+    {
+        M_FlowController flow = new M_FlowController();
+        M_Node node = (M_Node)info;
+        flow.StartTrainingInThisThread(node.State);
+
+        #if UNITY_EDITOR
+        if (node.State.SomeoneWon() == GlobalData.NO_PLAYER)
+            Debug.LogError("NADIE GANO AL EJECUTAR LA SIMULACION");
+        #endif
+
+        if (node.State.SomeoneWon() == id)
+        {
+            node.Score += GlobalData.MONTECARLO_REWARD;
+        }
+        else
+            node.Score += GlobalData.MONTECARLO_PENALIZATION;
+
+        tree.BackpropagateScore(node);
+        mMutex.WaitOne();
+        currentActiveSimulations--;
+        mMutex.ReleaseMutex();
     }
 }

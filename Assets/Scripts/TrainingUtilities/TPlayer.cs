@@ -74,6 +74,7 @@ public class TPlayer
     public void SetPlanets(List<TEventEntity> planets, bool takeSnapshot = false)
     {
         this.planets = planets;
+        TakeSnapshot();
     }
 
     public bool HasLost()
@@ -100,6 +101,17 @@ public class TPlayer
     public void RestoreSnapshot()
     {
         planets = new List<TEventEntity>(s_planets);
+    }
+
+    /// <summary>
+    /// Returns a new instance of TPlayer at the same state this instance is
+    /// Does not overwrite the this instance napshot
+    /// </summary>
+    /// <param name="level">List of entities of the new game</param>
+    /// <returns></returns>
+    public TPlayer GetSnapshot(TEventEntity[] level)
+    {
+        return new TPlayer(id, typeAI, level);
     }
 
     /// <summary>

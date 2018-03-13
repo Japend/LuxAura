@@ -12,6 +12,8 @@ public class TGame : BaseGame{
     /// ONLY THE VARIABLES THAT CAN CHANGE DURING A GAME ARE STORED
     /// </summary>
     List<TAttackInfo> s_pendingAttacks;
+    bool s_weHaveAWinner;
+    int s_Winner;
     #endregion
 
     TPlayer[] players;
@@ -89,7 +91,6 @@ public class TGame : BaseGame{
 
     public TGame(TPlayer[] pl, TEventEntity[] planets, List<TAttackInfo> attacks)
     {
-        GameMutex = new Mutex();
         players = pl;
         this.planets = planets;
         pendingAttacks = attacks;
@@ -100,11 +101,9 @@ public class TGame : BaseGame{
 
     public TGame()
     {
-        GameMutex = new Mutex();
     }
 
-
-    public void Initialize(TPlayer[] pl, TEventEntity[] planets, List<TAttackInfo> attacks)
+    public void Initialize(TPlayer[] pl, TEventEntity[] planets, List<TAttackInfo> attacks, bool thereIsWinner = false , int winner = GlobalData.NO_PLAYER)
     {
         players = pl;
         this.planets = planets;
@@ -159,13 +158,13 @@ public class TGame : BaseGame{
         for(int i = pendingAttacks.Count - 1; i >= 0; i--)
         {
             pendingAttacks[i].remainingTurns -= turns;
-            Debug.Log("Al ataque de " + pendingAttacks[i].Player + " hacia " + pendingAttacks[i].Destiny + " con " + pendingAttacks[i].Units + " le faltan " + pendingAttacks[i].remainingTurns);
+            //Debug.Log("Al ataque de " + pendingAttacks[i].Player + " hacia " + pendingAttacks[i].Destiny + " con " + pendingAttacks[i].Units + " le faltan " + pendingAttacks[i].remainingTurns);
             if (pendingAttacks[i].remainingTurns <= 0)
             {
-                Debug.Log("El planeta " + pendingAttacks[i].Destiny + " tiene unidades/salud/exp " + planets[pendingAttacks[i].Destiny].CurrentUnits + " / " + planets[pendingAttacks[i].Destiny].CurrentHealth + " / " + planets[pendingAttacks[i].Destiny].CurrentExp);
-                Debug.Log("Y sufre un ataque de " + pendingAttacks[i].Units);
+                //Debug.Log("El planeta " + pendingAttacks[i].Destiny + " tiene unidades/salud/exp " + planets[pendingAttacks[i].Destiny].CurrentUnits + " / " + planets[pendingAttacks[i].Destiny].CurrentHealth + " / " + planets[pendingAttacks[i].Destiny].CurrentExp);
+               // Debug.Log("Y sufre un ataque de " + pendingAttacks[i].Units);
                 planets[pendingAttacks[i].Destiny].SufferAttack(pendingAttacks[i]);
-                Debug.Log("Ahora el planeta tiene unidades/salud/exp " + planets[pendingAttacks[i].Destiny].CurrentUnits + " / " + planets[pendingAttacks[i].Destiny].CurrentHealth + " / " + planets[pendingAttacks[i].Destiny].CurrentExp);
+               // Debug.Log("Ahora el planeta tiene unidades/salud/exp " + planets[pendingAttacks[i].Destiny].CurrentUnits + " / " + planets[pendingAttacks[i].Destiny].CurrentHealth + " / " + planets[pendingAttacks[i].Destiny].CurrentExp);
                 pendingAttacks.RemoveAt(i);
             }
 
@@ -244,9 +243,43 @@ public class TGame : BaseGame{
         }
 
         s_pendingAttacks = new List<TAttackInfo>(pendingAttacks);
+        s_weHaveAWinner = weHaveAWinner;
+        s_Winner = winner;
     }
-    
 
+    /// <summary>
+    /// Same as take snapshot, but stores the current state in a new TGame and returns it
+    /// DOES NOT OVERWRITE SNAPSHOT
+    /// </summary>
+    public TGame TakeAndGetSnapshot()
+    {
+        TEventEntity[] s_planets = new TEventEntity[planets.Length];
+        TGame game = new TGame();
+
+        for (int i = 0; i < planets.Length; i++)
+        {
+            s_planets[i] = planets[i].GetSnapshot(game);
+        }
+
+        TPlayer[] s_players = new TPlayer[players.Length];
+        List<TEventEntity> aux;
+        for (int i = 0; i < players.Length; i++)
+        {
+            aux = new List<TEventEntity>();
+            s_players[i] = players[i].GetSnapshot(s_planets);
+            foreach (TEventEntity ent in s_planets)
+            {
+                if (ent.CurrentPlayerOwner == s_players[i].Id)
+                    aux.Add(ent);
+            }
+            s_players[i].SetPlanets(aux);
+        }
+
+        List<TAttackInfo> s_attacks = new List<TAttackInfo>(pendingAttacks);
+
+        game.Initialize (s_players, s_planets, s_attacks, weHaveAWinner, winner);
+        return game;
+    }
     /// <summary>
     /// Restores the saved state of the game
     /// </summary>
@@ -263,14 +296,14 @@ public class TGame : BaseGame{
         }
 
         pendingAttacks = new List<TAttackInfo>(s_pendingAttacks);
+        weHaveAWinner = s_weHaveAWinner;
+        winner = s_Winner;
     }
 
     public void AddAttack(TAttackInfo att)
     {
-        Debug.Log("Jugador " + att.Player + " añade ataque para planeta " + att.Destiny + " con " + att.Units + " que tardara " + att.remainingTurns);
-        GameMutex.WaitOne();
+        //Debug.Log("Jugador " + att.Player + " añade ataque para planeta " + att.Destiny + " con " + att.Units + " que tardara " + att.remainingTurns);
         pendingAttacks.Add(att);
-        GameMutex.ReleaseMutex();
     }
 
     public bool EveryoneDecided()

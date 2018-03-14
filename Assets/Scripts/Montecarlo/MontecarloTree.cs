@@ -67,6 +67,13 @@ public class MontecarloTree {
         int currentBest = -1;
         for (int i = 0; i < GlobalData.NUMBER_OF_ACTIONS; i++)
         {
+            if (((Actions)i == Actions.AttackNeutral && !tree[0].State.PlayerCanAttackNeutral()) ||
+               ((Actions)i == Actions.Heal && !tree[0].State.PlayerCanHeal(id)) ||
+               ((Actions)i == Actions.Upgrade && !tree[0].State.PlayerCanLevelUp(id)))
+            {
+                continue;
+            }
+
             if (tree[0 + i + 1].Score > max)
             {
                 max = tree[0 + i + 1].Score;
@@ -172,6 +179,16 @@ public class MontecarloTree {
         //for each action we...
         for (int i = 0; i < GlobalData.NUMBER_OF_ACTIONS; i++)
         {
+            if (((Actions)i == Actions.AttackNeutral && !node.State.PlayerCanAttackNeutral()) ||
+                ((Actions)i == Actions.Heal && !node.State.PlayerCanHeal(id)) ||
+                ((Actions)i == Actions.Upgrade && !node.State.PlayerCanLevelUp(id)))
+            {
+                aux = new M_Node(null, ((node.Position * 5) + i + 1));
+                aux.Available = false;
+                node.freeChildren--;
+                tree[aux.Position] = aux;
+            }
+
             ///...execute the action and advance the corresponding turns...
             flowController.AdvanceTurnAndExecuteActions(id, (Actions) i, initial);
             ///...create the new node with a copy of this state
@@ -239,34 +256,34 @@ public class MontecarloTree {
     /// <returns>Index of the child (0-4)</returns>
     private int GetBestChild(M_Node parent)
     {
-        #if UNITY_EDITOR
+        /*#if UNITY_EDITOR
         if(parent.freeChildren <= 0)
             Debug.LogError("THE PARENT THAT WAS CHOSEN HAD NOT FREE CHILDREN");
-        if(tree[parent.Position * 5] == null)
+        if(tree[parent.Position * 5 + 1] == null)
             Debug.LogError("THE PARENT THAT WAS CHOSEN HAD NOT CHILDREN");
-        #endif
+        #endif*/
 
         double currentMax = double.NegativeInfinity;
         int winnerChild = -1;
         M_Node currentChild;
         double aux;
-        Debug.Log("Buscando mejor hijo del nodo " + parent.Position);
+        //Debug.Log("Buscando mejor hijo del nodo " + parent.Position);
         for (int i = 0; i < GlobalData.NUMBER_OF_ACTIONS; i++)
         {
             //get the child
             currentChild = tree[(parent.Position * 5) + i + 1];
-            Debug.Log("Mirando el hijo " + currentChild.Position);
+           // Debug.Log("Mirando el hijo " + currentChild.Position);
             ///if there are no free children or it is not available, the node is not considered
             if (currentChild.freeChildren <= 0 || !currentChild.Available)
             {
-                Debug.Log("Todos los hijos estaban ocupados o el nodo no estaba libre");
+                //Debug.Log("Todos los hijos estaban ocupados o el nodo no estaba libre");
                 continue;
             }
 
             //if the node has not been visited, the value is infinite
             if (currentChild.Visits <= 0)
             {
-                Debug.Log("El hijo no habia sido visitado y se selecciona");
+                //Debug.Log("El hijo no habia sido visitado y se selecciona");
                 //since in case of a tie we visit the nodes in order and this value
                 //cant be surpased, we stop searching and return this node
                 parent.Visits++;
@@ -274,12 +291,12 @@ public class MontecarloTree {
             }
 
             aux = (currentChild.Score / currentChild.Visits) + (CONSTANT_TERM * Math.Sqrt(Math.Log(parent.Visits) / currentChild.Visits));
-            Debug.Log("punt = " + currentChild.Score + "/" + currentChild.Visits + " * 2 * raiz( ln(" + (parent.Visits) + ") / " + currentChild.Visits);
-            Debug.Log("Obtiene una puntuacion de " + aux);
+            //Debug.Log("punt = " + currentChild.Score + "/" + currentChild.Visits + " * 2 * raiz( ln(" + (parent.Visits) + ") / " + currentChild.Visits);
+           // Debug.Log("Obtiene una puntuacion de " + aux);
 
             if (aux > currentMax)
             {
-                Debug.Log("Este es el nuevo mejor hijo");
+                //Debug.Log("Este es el nuevo mejor hijo");
                 currentMax = aux;
                 winnerChild = i;
             }
@@ -288,15 +305,15 @@ public class MontecarloTree {
         #if UNITY_EDITOR
         if (winnerChild == -1)
         {
-            Debug.LogError("ALGO HA IDO MAL AL SACAR EL MEJOR HIJO Y NO SE HA ELEGIDO NINGUNO");
+           // Debug.LogError("ALGO HA IDO MAL AL SACAR EL MEJOR HIJO Y NO SE HA ELEGIDO NINGUNO");
             return -2;
         }
         
         #endif
 
         parent.Visits++;
-        Debug.Log("El mejor hijo es " + (parent.Position * 5 + winnerChild + 1) + " y el padre ahora tiene " + parent.Visits + " visitas");
-        Debug.Log("Se visita el hijo " + tree[(parent.Position * 5) + winnerChild + 1].Position + " que ahora tiene " + tree[(parent.Position * 5) + winnerChild + 1].Visits + " visitas");
+       // Debug.Log("El mejor hijo es " + (parent.Position * 5 + winnerChild + 1) + " y el padre ahora tiene " + parent.Visits + " visitas");
+       // Debug.Log("Se visita el hijo " + tree[(parent.Position * 5) + winnerChild + 1].Position + " que ahora tiene " + tree[(parent.Position * 5) + winnerChild + 1].Visits + " visitas");
         return winnerChild + 1;
 
     }
@@ -308,15 +325,15 @@ public class MontecarloTree {
     private void BackpropagateFreeChildrenDecrement(M_Node start)
     {
         tree[(start.Position - 1) / 5].freeChildren--;
-        Debug.Log("El nodo " + ((start.Position - 1) / 5) + " tiene ahora " + tree[(start.Position - 1) / 5].freeChildren + " hijos libres");
-        if (tree[(start.Position - 1) / 5].freeChildren <= 0)
+        //Debug.Log("El nodo " + ((start.Position - 1) / 5) + " tiene ahora " + tree[(start.Position - 1) / 5].freeChildren + " hijos libres");
+        if (tree[(start.Position - 1) / 5].freeChildren == 0)
             BackpropagateFreeChildrenDecrement(tree[(start.Position - 1) / 5]);
     }
 
     private void BackpropagateFreeChildrenIncrement(M_Node start)
     {
         tree[(start.Position - 1) / 5].freeChildren++;
-        Debug.Log("El nodo " + ((start.Position - 1) / 5) + " tiene ahora " + tree[(start.Position - 1) / 5].freeChildren + " hijos libres");
+        //Debug.Log("El nodo " + ((start.Position - 1) / 5) + " tiene ahora " + tree[(start.Position - 1) / 5].freeChildren + " hijos libres");
         //if before was zero, the grandparent now has a new free child
         if (tree[(start.Position - 1) / 5].freeChildren == 1)
             BackpropagateFreeChildrenIncrement(tree[(start.Position - 1) / 5]);

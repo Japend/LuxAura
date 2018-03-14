@@ -47,10 +47,21 @@ public class Player :ClockEventReceiver{
                 case AIType.Classic:
                     AI = new ClasicAI(this);
                     break;
+                case AIType.Montecarlo:
+                    AI = new MontecarloAI(this.Id);
+                    break;
             }
             Clock.Instance.AddListener(this);
             myEffector = new Effector(this);
             deactivated = false;
+        }
+    }
+
+    void OnApplicationQuit()
+    {
+        if (typeAI == AIType.Montecarlo)
+        {
+            ((MontecarloAI)AI).Stop();
         }
     }
 
@@ -66,8 +77,10 @@ public class Player :ClockEventReceiver{
             if (PendingAICycle)
             {
                 PendingAICycle = false;
-                Actions act = AI.Decide();
-                myEffector.Execute(act);
+                /*Actions act = AI.Decide();
+                myEffector.Execute(act);*/
+                StopCoroutine("AICycle");
+                 StartCoroutine("AICycle");
             }
         }
 
@@ -109,7 +122,7 @@ public class Player :ClockEventReceiver{
             {
                 //print("tick ia");
                 PendingAICycle = true;
-                /* StopCoroutine("AICycle");
+                 /*StopCoroutine("AICycle");
                  StartCoroutine("AICYcle");*/
             }
         }

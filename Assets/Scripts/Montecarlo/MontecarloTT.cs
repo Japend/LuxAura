@@ -54,6 +54,9 @@ public class MontecarloTT
     /// </summary>
     MontecarloAI support;
 
+
+    int maxNodo;
+
     /// <summary>
     /// Initilices the class creating a tree but does NOT start the simulation
     /// </summary>
@@ -94,6 +97,8 @@ public class MontecarloTT
     {
         stop = true;
         support.ActionToExecute = tree.GetBestAction();
+        Debug.Log("Se ha llegado hasta el nodo " + maxNodo);
+        Debug.Log("ACTION TO EXECUTE = " + support.ActionToExecute);
         support.Ready = true;
     }
 
@@ -104,6 +109,7 @@ public class MontecarloTT
     /// <param name="info">TGame with the current state of the game (the simullation will continue from there)</param>
     private void MotherThread(System.Object info)
     {
+        maxNodo = 0;
         tree = new MontecarloTree((TGame)info, id);
         M_Node aux;
         while (!stop)
@@ -111,13 +117,15 @@ public class MontecarloTT
             if (currentActiveSimulations <= maxSimulations)
             {
                 aux = tree.SearchForNextNode();
+                if (aux.Position > maxNodo)
+                    maxNodo = aux.Position;
                 mMutex.WaitOne();
                 currentActiveSimulations++;
                 mMutex.ReleaseMutex();
                 ThreadPool.QueueUserWorkItem(Simulate, aux);
             }
-            else
-                Thread.Sleep(40);
+            /*else
+                Thread.Sleep(40);*/
         }
     }
 
@@ -126,8 +134,8 @@ public class MontecarloTT
     {
         M_FlowController flow = new M_FlowController();
         M_Node node = (M_Node)info;
+        //Debug.Log("Empezando entrenamiento de nodo " + node.Position);
         flow.StartTrainingInThisThread(node.State);
-
         #if UNITY_EDITOR
         if (node.State.SomeoneWon() == GlobalData.NO_PLAYER)
             Debug.LogError("NADIE GANO AL EJECUTAR LA SIMULACION");
@@ -135,14 +143,21 @@ public class MontecarloTT
 
         if (node.State.SomeoneWon() == id)
         {
+            //Debug.Log("Terminando entrenamiento de nodo " + node.Position);
             node.Score += GlobalData.MONTECARLO_REWARD;
         }
         else
             node.Score += GlobalData.MONTECARLO_PENALIZATION;
-
+        //Debug.Log("Terminando entrenamiento de nodo " + node.Position + " con "  + node.Score + " puntos" );
         tree.BackpropagateScore(node);
+        node.State.RestoreSnapshot();
         mMutex.WaitOne();
         currentActiveSimulations--;
         mMutex.ReleaseMutex();
+    }
+
+    public void Stop()
+    {
+        stop = true;
     }
 }

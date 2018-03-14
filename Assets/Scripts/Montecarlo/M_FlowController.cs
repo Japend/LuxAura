@@ -98,6 +98,7 @@ public class M_FlowController
                 if (currentWinner != GlobalData.NO_PLAYER)
                 {
                     someoneWon = true;
+                    break;
                     //Debug.Log("ALGUIEN HA GANADO: " + currentWinner);
                 }
 

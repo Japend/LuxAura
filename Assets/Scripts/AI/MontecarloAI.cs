@@ -24,8 +24,14 @@ public class MontecarloAI : AI {
 
     public void MontecarloDecide(TGame currentState)
     {
+        Debug.Log("EMPEZANDO");
         Ready = false;
         ActionToExecute = Utilities.Actions.None;
         simulator.StartTreeSearch(currentState);
+    }
+
+    public void Stop()
+    {
+        simulator.Stop();
     }
 }

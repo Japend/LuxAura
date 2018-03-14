@@ -58,16 +58,16 @@ public class Game {
 
     public int SomeoneWon()
     {
-        int winner = -1;
+        int winner = GlobalData.NO_PLAYER;
         foreach (Transform child in level.transform)
         {
-            if (winner == -1)
+            if (winner == GlobalData.NO_PLAYER)
             {
                 winner = child.GetComponent<Planet>().CurrentPlayerOwner;
             }
             else
             {
-                if (winner != child.GetComponent<Planet>().CurrentPlayerOwner /*&& child.GetComponent<Planet>().CurrentPlayerOwner != GlobalData.NO_PLAYER*/)
+                if (winner != child.GetComponent<Planet>().CurrentPlayerOwner && child.GetComponent<Planet>().CurrentPlayerOwner != GlobalData.NO_PLAYER)
                     return -1;
             }
         }

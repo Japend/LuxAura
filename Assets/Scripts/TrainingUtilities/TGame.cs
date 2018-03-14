@@ -33,7 +33,7 @@ public class TGame : BaseGame{
     public TGame(PlayerSettings[] players, TrainingPlanetInfo[] planetsInfo)
     {
         GameMutex = new Mutex();
-        Debug.Log("EMPEZANDO PARTIDA - CREANDO PLANETAS");
+        //Debug.Log("EMPEZANDO PARTIDA - CREANDO PLANETAS");
         #region PREPARING PLANETS
         planets = new TPlanet[planetsInfo.Length];
 
@@ -65,7 +65,7 @@ public class TGame : BaseGame{
         }
         #endregion
 
-        Debug.Log("EMPEZANDO PARTIDA - CREANDO JUGADORES");
+        //Debug.Log("EMPEZANDO PARTIDA - CREANDO JUGADORES");
         #region PREPARING_PLAYERS
         TPlayer[] mplayers = new TPlayer[players.Length];
         List<TEventEntity> aux2;
@@ -79,7 +79,7 @@ public class TGame : BaseGame{
             }
 
             mplayers[i] = new TPlayer(i, aux2, players[i].TypeAI, planets, true);
-            Debug.Log("Jugador " + i + " creado con " + aux2.Count + " planetas e IA " + players[i].TypeAI);
+            //Debug.Log("Jugador " + i + " creado con " + aux2.Count + " planetas e IA " + players[i].TypeAI);
         }
         this.players = mplayers;
         #endregion
@@ -199,7 +199,7 @@ public class TGame : BaseGame{
             if (!play.HasLost())
             {
                 play.Decide();
-                Debug.Log("Jugador " + play.Id + " decide " + play.actionToBeDone);
+               // Debug.Log("Jugador " + play.Id + " decide " + play.actionToBeDone);
             }
         }
     }
@@ -314,5 +314,26 @@ public class TGame : BaseGame{
                 return false;
         }
         return true;
+    }
+
+
+    public bool PlayerCanLevelUp(int id)
+    {
+        return players[id].AreTherePlanetsToLevelUp();
+    }
+
+    public bool PlayerCanHeal(int id)
+    {
+        return players[id].AreTherePlanetsToHeal();
+    }
+
+    public bool PlayerCanAttackNeutral()
+    {
+        foreach(TPlanet pl in planets)
+        {
+            if (pl.CurrentPlayerOwner == GlobalData.NO_PLAYER)
+                return true;
+        }
+        return false;
     }
 }

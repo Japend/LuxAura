@@ -138,6 +138,12 @@ public class TPlayer
     public void DecisionThread()
     {
         actionToBeDone = AI.Decide();
+
+        if (!AreTherePlanetsToLevelUp() && (typeAI == AIType.Random || typeAI == AIType.Montecarlo))
+        {
+            while(actionToBeDone == Actions.Upgrade)
+                actionToBeDone = AI.Decide();
+        }
         effector.Execute(actionToBeDone);
         decisionTaken = true;
     }
@@ -145,5 +151,25 @@ public class TPlayer
     public void Deactivate()
     {
         deactivated = true;
+    }
+
+    public bool AreTherePlanetsToLevelUp()
+    {
+        foreach (TPlanet pl in planets)
+        {
+            if (pl.CurrentLevel < pl.MaxLevel)
+                return true;
+        }
+        return false;
+    }
+
+    public bool AreTherePlanetsToHeal()
+    {
+        foreach (TPlanet pl in planets)
+        {
+            if (pl.CurrentHealth < pl.MaxHealth)
+                return true;
+        }
+        return false;
     }
 }

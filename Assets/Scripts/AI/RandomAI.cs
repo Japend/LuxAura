@@ -5,9 +5,15 @@ using Utilities;
 
 public class RandomAI : AI {
 
+    System.Random rand;
+
+    public RandomAI()
+    {
+        rand = new System.Random();
+    }
 
     public Actions Decide()
     {
-        return (Actions)Random.Range(0, 5);
+        return (Actions)rand.Next(0, 6);
     }
 }

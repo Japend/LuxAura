@@ -14,6 +14,7 @@ public class RandomAI : AI {
 
     public Actions Decide()
     {
-        return (Actions)rand.Next(0, 6);
+        return (Actions)rand.Next(0, 5);
     }
+
 }

@@ -144,7 +144,6 @@ public class Effector{
     {
         List<EventEntity> result = new List<EventEntity>();
         EventEntity aux, aux2;
-        float currentDistance = float.PositiveInfinity;
         result.Add(myPlayer.Planets[0]);
 
         for (int i = 1; i < myPlayer.Planets.Count; i++)

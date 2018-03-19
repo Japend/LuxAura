@@ -41,11 +41,12 @@ public class GlobalData
     #region CONSTANTS
     public const double MILISECONDS_BETWEEN_TICKS = 200;
     public const double MILISECONDS_BETWEEN__AI_TICKS = 4000;
+    public const int TIE = -2;
     public const int NO_PLAYER = -1;
     public const int HUMAN_PLAYER = 0;
     public const int AI_PLAYERS = 1;
     public const int NUMBER_OF_ACTIONS = 5;
-    public const int MONTECARLO_TIMER_MILISECONDS = 1500;
+    public const int MONTECARLO_TIMER_MILISECONDS = 2500;
 
     public const int MONTECARLO_REWARD = 10;
     public const int MONTECARLO_PENALIZATION = -10;

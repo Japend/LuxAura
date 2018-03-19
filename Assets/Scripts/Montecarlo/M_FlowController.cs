@@ -20,12 +20,28 @@ public class M_FlowController
 
     private PlayerSettings test1, test2;
 
+    public int currentWinner;
+    public bool someoneWon;
 
     public PlayerSettings[] Players;
     protected TGame currentGame;
     public TGame CurrentGame { get { return currentGame; } }
 
+    /// <summary>
+    /// This score will be used to tweak the decision of montecarlo by considering those actions that lead to a better
+    /// genration unit ratio in the short term
+    /// </summary>
+    public int RatioExtraScore;
+    public int mPlayerId;
+
     private int gamesPlayed = 0;
+
+
+    public M_FlowController(int plId = 0)
+    {
+        mPlayerId = plId;
+    }
+
 
     /// <summary>
     /// Creates a game and trains the given amount of times (1 by default)
@@ -69,20 +85,30 @@ public class M_FlowController
 
     private void Train()
     {
-        bool someoneWon = false;
-        int currentWinner = GlobalData.NO_PLAYER;
+        someoneWon = false;
+        currentWinner = GlobalData.NO_PLAYER;
         int turnsToAdvance = 1;
         int turnsBetweenAITicks = (int)(GlobalData.MILISECONDS_BETWEEN__AI_TICKS / GlobalData.MILISECONDS_BETWEEN_TICKS);
         int remainingTurnsForNextAITick = turnsBetweenAITicks;
-
+        int gameTurns;
         while (gamesPlayed < TotalGamesToPlay)
         {
             //Debug.Log("COMENZANDO PARTIDA " + gamesPlayed + " DE " + TotalGamesToPlay);
             someoneWon = false;
             currentGame.RestoreSnapshot();
+            gameTurns = 0;
+            RatioExtraScore = currentGame.GetUnitGenerationRatio(mPlayerId);
             while (!someoneWon)
             {
+                if(gameTurns == 7)
+                    RatioExtraScore = mPlayerId - RatioExtraScore;
 
+                if (gameTurns > 300)
+                {
+                    currentWinner = GlobalData.TIE;
+                    someoneWon = true;
+                    break;
+                }
                 //check pending attacks and get turns for the arrival of the next attack
                 turnsToAdvance = currentGame.CheckPendingAttacks(turnsToAdvance);
 

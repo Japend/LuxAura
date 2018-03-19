@@ -54,6 +54,7 @@ public class MontecarloTT
     /// </summary>
     MontecarloAI support;
 
+    float timeStarted;
 
     int maxNodo;
 
@@ -69,6 +70,7 @@ public class MontecarloTT
         id = playerId;
         int dummy;
         ThreadPool.GetMaxThreads(out maxSimulations, out dummy);
+        maxSimulations -= 2;
         mMutex = new Mutex();
         this.support = support;
     }
@@ -82,7 +84,6 @@ public class MontecarloTT
         stop = false;
         Clock.Instance.AddTimerForMontecarlo(new System.Timers.ElapsedEventHandler(TimesUp));
         //We substract one because the mother thread will always be there
-        maxSimulations--;
         currentActiveSimulations = 0;
         ThreadPool.QueueUserWorkItem(MotherThread, currentState);
     }
@@ -97,8 +98,8 @@ public class MontecarloTT
     {
         stop = true;
         support.ActionToExecute = tree.GetBestAction();
-        Debug.Log("Se ha llegado hasta el nodo " + maxNodo);
-        Debug.Log("ACTION TO EXECUTE = " + support.ActionToExecute);
+        Debug.LogWarning("Se ha llegado hasta el nodo " + maxNodo);
+        Debug.LogWarning("ACTION TO EXECUTE = " + support.ActionToExecute);
         support.Ready = true;
     }
 
@@ -112,8 +113,13 @@ public class MontecarloTT
         maxNodo = 0;
         tree = new MontecarloTree((TGame)info, id);
         M_Node aux;
+        currentActiveSimulations = 0;
         while (!stop)
         {
+          //  Debug.Log("Entra bucle");
+            //security check
+            /*if (maxNodo > 150000)
+                break;*/
             if (currentActiveSimulations <= maxSimulations)
             {
                 aux = tree.SearchForNextNode();
@@ -124,16 +130,20 @@ public class MontecarloTT
                 mMutex.ReleaseMutex();
                 ThreadPool.QueueUserWorkItem(Simulate, aux);
             }
-            /*else
-                Thread.Sleep(40);*/
+            else
+            {
+                Debug.Log("No hay threads libres");
+                Thread.Sleep(40);
+            }
         }
     }
 
 
     private void Simulate(System.Object info)
     {
-        M_FlowController flow = new M_FlowController();
+        M_FlowController flow = new M_FlowController(id);
         M_Node node = (M_Node)info;
+
         //Debug.Log("Empezando entrenamiento de nodo " + node.Position);
         flow.StartTrainingInThisThread(node.State);
         #if UNITY_EDITOR
@@ -141,14 +151,18 @@ public class MontecarloTT
             Debug.LogError("NADIE GANO AL EJECUTAR LA SIMULACION");
         #endif
 
-        if (node.State.SomeoneWon() == id)
+        if (flow.currentWinner == id)
         {
             //Debug.Log("Terminando entrenamiento de nodo " + node.Position);
             node.Score += GlobalData.MONTECARLO_REWARD;
         }
-        else
+        else if (flow.currentWinner != GlobalData.TIE)
             node.Score += GlobalData.MONTECARLO_PENALIZATION;
-        //Debug.Log("Terminando entrenamiento de nodo " + node.Position + " con "  + node.Score + " puntos" );
+        else
+            node.Score = 0;
+
+        node.Score += flow.RatioExtraScore * 2;
+       // Debug.Log("Terminando entrenamiento de nodo " + node.Position + " con "  + node.Score + " puntos" );
         tree.BackpropagateScore(node);
         node.State.RestoreSnapshot();
         mMutex.WaitOne();

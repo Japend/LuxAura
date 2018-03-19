@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Utilities;
 
-public class TEffector {
+public class TEffector
+{
 
     TPlayer myPlayer;
     TEventEntity[] map;
@@ -11,9 +12,9 @@ public class TEffector {
 
     public TEffector(TPlayer play, TEventEntity[] map)
     {
-       myPlayer = play;
-       this.map = map;
-       rand = new System.Random();
+        myPlayer = play;
+        this.map = map;
+        rand = new System.Random();
     }
 
     public void Execute(Actions action)
@@ -143,7 +144,7 @@ public class TEffector {
         }
 
         if (randomNumber)
-            return Mathf.RoundToInt(objective * (1.4f - (float) rand.NextDouble()));
+            return Mathf.RoundToInt(objective * (1.4f - (float)rand.NextDouble()));
         else
             return objective;
     }
@@ -204,7 +205,6 @@ public class TEffector {
     {
         List<TEventEntity> result = new List<TEventEntity>();
         TEventEntity aux, aux2;
-        float currentDistance = float.PositiveInfinity;
         result.Add(myPlayer.Planets[0]);
 
         for (int i = 1; i < myPlayer.Planets.Count; i++)

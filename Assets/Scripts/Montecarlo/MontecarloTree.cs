@@ -51,6 +51,8 @@ public class MontecarloTree {
 
         tree = new M_Node[100];
         tree[0] = new M_Node(gameStateAtRoot, 0);
+        if (tree[0].State.SomeoneWon() != GlobalData.NO_PLAYER)
+            Debug.Log("VICTORIA EN LA RAIZ");
         this.id = id;
         flowController = new M_FlowController();
         treeMutex = new Mutex();
@@ -92,18 +94,18 @@ public class MontecarloTree {
     /// </summary>
     public M_Node SearchForNextNode()
     {
-        Debug.Log("Buscando mejor hijo");
+        //Debug.Log("Buscando mejor hijo");
         treeMutex.WaitOne();
         ///FALTA COMPROBAR PETICIONES ACUMULADAS
 
         //we start at the root
         M_Node currentNode = tree[0];
 
-        Debug.Log("Empezamos en la raiz");
+       // Debug.Log("Empezamos en la raiz");
         //if the root has no children available, we wait
         if (currentNode.freeChildren <= 0)
         {
-            Debug.Log("No hay nodos libres");
+           // Debug.Log("No hay nodos libres");
             treeMutex.ReleaseMutex();
             return null;
         }
@@ -121,10 +123,10 @@ public class MontecarloTree {
             //if the array needs to be resized
             if ((currentNode.Position * (5 + 1)) >= (tree.Length - 1))
             {
-                Debug.Log("Se amplia el arbol");
+               // Debug.Log("Se amplia el arbol");
                 Array.Resize<M_Node>(ref tree, (tree.Length * 10));
             }
-            Debug.Log("Pasamos por el nodo " + currentNode.Position);
+          // Debug.Log("Pasamos por el nodo " + currentNode.Position);
         }
 
         //now we have a leaf node
@@ -141,7 +143,7 @@ public class MontecarloTree {
         //we return the objective node
         //we return here no matter if the game has been won or not, to allow backpropagation
         BackpropagateFreeChildrenDecrement(currentNode);
-        Debug.Log("El hijo que va a explorarse es " + currentNode.Position);
+        //Debug.Log("El hijo que va a explorarse es " + currentNode.Position);
         currentNode.Visits++;
         currentNode.Available = false;
         treeMutex.ReleaseMutex();
@@ -162,14 +164,14 @@ public class MontecarloTree {
         //if the game in the node has already been won we don't extend it
         if (node.State.SomeoneWon() != GlobalData.NO_PLAYER)
         {
-            Debug.Log("El nodo contiene victoria, no se expande");
+           // Debug.Log("El nodo contiene victoria, no se expande");
             return;
         }
 
         //if the array already has children
         if (tree[node.Position * 5 + 1] != null)
         {
-            Debug.LogError("EL NODO QUE SE HA EXPANDIDO YA TIENE HIJOS");
+           // Debug.LogError("EL NODO QUE SE HA EXPANDIDO YA TIENE HIJOS");
         }
 
         //we get the state in the node
@@ -184,6 +186,7 @@ public class MontecarloTree {
                 ((Actions)i == Actions.Upgrade && !node.State.PlayerCanLevelUp(id)))
             {
                 aux = new M_Node(null, ((node.Position * 5) + i + 1));
+                Debug.Log("El nodo " + aux.Position + " se ha hecho inalcanzable porque representa una accion que no puede ejecutarse");
                 aux.Available = false;
                 node.freeChildren--;
                 tree[aux.Position] = aux;
@@ -212,7 +215,7 @@ public class MontecarloTree {
                 //we mark th node as not available, so it wont be visited again
                 aux.Available = false;
                 node.freeChildren--;
-
+                Debug.Log("El nodo " + aux.Position + " se ha hecho inalcanzable porque representa VICTORIA");
             }
             Debug.Log("Se ha creado el nodo " + aux.Position);
         }
@@ -229,20 +232,20 @@ public class MontecarloTree {
         M_Node currentNode;
         int numberToPropagate = initial.Score;
         currentNode = tree[(initial.Position - 1) / 5];
-        Debug.Log("Backpropagation");
+        //Debug.Log("Backpropagation");
         //until we reach the root
         while (currentNode.Position != 0)
         {
-            Debug.Log("Se pasa por el nodo " + currentNode.Position + " que tenia " + currentNode.Score + " puntos");
+            //Debug.Log("Se pasa por el nodo " + currentNode.Position + " que tenia " + currentNode.Score + " puntos");
             currentNode.Score += numberToPropagate;
-            Debug.Log("Ahora tiene " + currentNode.Score + " puntos");
+            //Debug.Log("Ahora tiene " + currentNode.Score + " puntos");
             currentNode = tree[(currentNode.Position - 1) / 5];
         }
 
         //to add to the root
-        Debug.Log("Se pasa por el nodo " + currentNode.Position + " que tenia " + currentNode.Score + " puntos");
+        //Debug.Log("Se pasa por el nodo " + currentNode.Position + " que tenia " + currentNode.Score + " puntos");
         currentNode.Score += numberToPropagate;
-        Debug.Log("Ahora tiene " + currentNode.Score + " puntos");
+        //Debug.Log("Ahora tiene " + currentNode.Score + " puntos");
         BackpropagateFreeChildrenIncrement(initial);
         initial.Available = true;
         treeMutex.ReleaseMutex();
@@ -276,7 +279,7 @@ public class MontecarloTree {
             ///if there are no free children or it is not available, the node is not considered
             if (currentChild.freeChildren <= 0 || !currentChild.Available)
             {
-                //Debug.Log("Todos los hijos estaban ocupados o el nodo no estaba libre");
+                Debug.Log("Todos los hijos estaban ocupados o el nodo no estaba libre");
                 continue;
             }
 
@@ -290,7 +293,7 @@ public class MontecarloTree {
                 return i + 1;
             }
 
-            aux = (currentChild.Score / currentChild.Visits) + (CONSTANT_TERM * Math.Sqrt(Math.Log(parent.Visits) / currentChild.Visits));
+            aux = (currentChild.Score / currentChild.Visits) + (CONSTANT_TERM * (Math.Sqrt(Math.Log(parent.Visits) / currentChild.Visits)));
             //Debug.Log("punt = " + currentChild.Score + "/" + currentChild.Visits + " * 2 * raiz( ln(" + (parent.Visits) + ") / " + currentChild.Visits);
            // Debug.Log("Obtiene una puntuacion de " + aux);
 

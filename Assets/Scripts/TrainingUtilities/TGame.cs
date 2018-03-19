@@ -336,4 +336,15 @@ public class TGame : BaseGame{
         }
         return false;
     }
+
+    public int GetUnitGenerationRatio(int playerId)
+    {
+        int ratio = 0;
+        foreach (TPlanet pl in players[playerId].Planets)
+        {
+            ratio += (1 + pl.CurrentLevel);
+        }
+
+        return ratio;
+    }
 }
